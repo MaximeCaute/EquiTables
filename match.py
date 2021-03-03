@@ -13,6 +13,8 @@ The input to the program should be as follow:
 
 import argparse
 
+import data_conversion
+
 def get_arguments():
     """
     This function parses command line arguments.
@@ -60,5 +62,10 @@ if __name__ == "__main__":
     """
     args = get_arguments()
     with args.datafile as datafile:
-        data = datafile.readlines()
+        data_with_header = datafile.readlines()
+        
+    try:
+        data, header = data_conversion.convert_from_csv(data_with_header)
+    except Exception as e:
+        exit()
     pass
