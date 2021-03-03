@@ -3,7 +3,7 @@ Author(s): Maxime Cauté
 Created: 03.03.2021
 
 This file is the main .py file for the match program.
-Github repository: https://github.com/MaximeCaute/Match-and-Mix
+Github repository: https://github.com/MaximeCaute/Equitables
 
 The input to the program should be as follow:
     - a .csv file containing all the data with the relevant information;
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     args = get_arguments()
     with args.datafile as datafile:
         data_with_header = datafile.readlines()
-        
+
     try:
         data, header = data_conversion.convert_from_csv(data_with_header)
     except Exception as e:
