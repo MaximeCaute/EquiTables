@@ -1,0 +1,6 @@
+This file contains a list of people who have made large contributions
+to the public version of this repository.
+
+Original design and implementation:
+  Maxime Cauté <maxime.caute@ens-rennes.fr>
+  Christophe Pallier <christophe@pallier.org>
