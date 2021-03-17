@@ -5,6 +5,8 @@ Created: 03.03.2021
 This file regroups the functions dedicated to data conversion from input files to python data.
 """
 
+import pandas as pd
+
 def check_length_validity(dataline, header, line = None):
     """
     This function checks that the given dataline fits with the header.
