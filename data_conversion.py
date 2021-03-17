@@ -56,4 +56,5 @@ def convert_from_csv(data_with_header, delimiter:str = ";"):
     for line, unsplit_dataline in enumerate(unsplit_data):
         split_dataline = unsplit_dataline.split(";")
         check_length_validity(split_dataline, header, line = line)
+        data.append(split_dataline)
     return data, header
