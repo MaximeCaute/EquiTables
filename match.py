@@ -48,6 +48,11 @@ def get_arguments():
                         default = "50",
                         help = "The size of the data subset to return. "
                         + "Defaults to 50")
+    parser.add_argument("-p", "--save_path", type = str,
+                        default = "",
+                        help = "The path to where to save the results, "
+                        +"from the current folder. "
+                        +"Defaults to current folder.")
     args = parser.parse_args()
     return args
 
@@ -58,8 +63,8 @@ if __name__ == "__main__":
     ---
     Call example:
         - python3 match.py ToySets/toy_data.csv -mp Value -dp Control -s 2
+        - python3 match.py ToySets/toy_data.csv -mp Value -dp Control -s 2 -p results/
     """
-    save_path = "results/"
     SAVE_NAME = "data_group"
 
     args = get_arguments()
@@ -79,6 +84,6 @@ if __name__ == "__main__":
     for i, group_indices in enumerate(groups_indices):
         group_data = dataframe.iloc[group_indices]
 
-        path = save_path+SAVE_NAME+str(i)+".csv"
+        path = args.save_path+SAVE_NAME+str(i)+".csv"
         with open(path, "w") as f:
             group_data.to_csv(f, index = False)
