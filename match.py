@@ -84,6 +84,6 @@ if __name__ == "__main__":
     for i, group_indices in enumerate(groups_indices):
         group_data = dataframe.iloc[group_indices]
 
-        path = args.save_path+SAVE_NAME+str(i)+".csv"
+        path = args.save_path+SAVE_NAME+str(i+1)+".csv"
         with open(path, "w") as f:
             group_data.to_csv(f, index = False)
