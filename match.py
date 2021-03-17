@@ -47,10 +47,8 @@ def get_arguments():
                         default = "50",
                         help = "The size of the data subset to return. "
                         + "Defaults to 50")
-
     args = parser.parse_args()
     return args
-
 
 if __name__ == "__main__":
     """
@@ -60,7 +58,23 @@ if __name__ == "__main__":
     Call example:
         - python3 match.py ToySets/toy_data.csv -mp Value -dp Control
     """
+    save_path = "results/"
+    SAVE_NAME = "data_group"
+
     args = get_arguments()
     with args.datafile as datafile:
-        dataframe = pandas.read_csv(datafile, sep = ";")
-        data_header = dataframe.columns
+        dataframe = pandas.read_csv(datafile, sep = args.delimiter)
+
+    parameters_to_match = args.matching_parameters.split(";")
+    parameters_to_differentiate = args.differentiation_parameters.split(";")
+    data_to_match = dataframe[parameters_to_match]
+    data_to_differentiate = dataframe[parameters_to_differentiate]
+
+    groups_indices = [[0,1], [2]]
+
+    for i, group_indices in enumerate(groups_indices):
+        group_data = dataframe.iloc[group_indices]
+
+        path = save_path+SAVE_NAME+str(i)+".csv"
+        with open(path, "w") as f:
+            group_data.to_csv(f, index = False)
