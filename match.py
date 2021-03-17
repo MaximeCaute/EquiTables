@@ -12,8 +12,9 @@ The input to the program should be as follow:
 """
 
 import argparse
-
 import pandas
+
+import data_spliter
 
 def get_arguments():
     """
@@ -56,7 +57,7 @@ if __name__ == "__main__":
 
     ---
     Call example:
-        - python3 match.py ToySets/toy_data.csv -mp Value -dp Control
+        - python3 match.py ToySets/toy_data.csv -mp Value -dp Control -s 2
     """
     save_path = "results/"
     SAVE_NAME = "data_group"
@@ -70,7 +71,10 @@ if __name__ == "__main__":
     data_to_match = dataframe[parameters_to_match]
     data_to_differentiate = dataframe[parameters_to_differentiate]
 
-    groups_indices = [[0,1], [2]]
+    groups_indices = data_spliter.compute_groups_indices(
+                                    data_to_match,
+                                    data_to_differentiate,
+                                    groups_size = args.subset_size)
 
     for i, group_indices in enumerate(groups_indices):
         group_data = dataframe.iloc[group_indices]
