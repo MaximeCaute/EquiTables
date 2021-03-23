@@ -4,8 +4,7 @@ Created: 17.03.2021
 
 This file is dedicated to the seperation of data into appropriate groups
 """
-
-def compute_groups_indices( data_to_match, data_to_differentiate,
+def compute_subgroups_indices( data_to_match, data_to_differentiate,
                             groups_size = 2):
     """
     This function computes indices for groups based on data.

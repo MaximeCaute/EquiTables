@@ -76,7 +76,7 @@ if __name__ == "__main__":
     data_to_match = dataframe[parameters_to_match]
     data_to_differentiate = dataframe[parameters_to_differentiate]
 
-    groups_indices = data_spliter.compute_groups_indices(
+    subgroups_indices = data_spliter.compute_subgroups_indices(
                                     data_to_match,
                                     data_to_differentiate,
                                     groups_size = args.subset_size)
@@ -84,6 +84,7 @@ if __name__ == "__main__":
     for i, group_indices in enumerate(groups_indices):
         group_data = dataframe.iloc[group_indices]
 
+        #More explicit name?
         path = args.save_path+SAVE_NAME+str(i+1)+".csv"
         with open(path, "w") as f:
             group_data.to_csv(f, index = False)
