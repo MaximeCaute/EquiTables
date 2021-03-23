@@ -81,10 +81,10 @@ if __name__ == "__main__":
                                     data_to_differentiate,
                                     groups_size = args.subset_size)
 
-    for i, group_indices in enumerate(groups_indices):
-        group_data = dataframe.iloc[group_indices]
+    for i, subgroup_indices in enumerate(subgroups_indices):
+        subgroup_data = dataframe.iloc[subgroup_indices]
 
         #More explicit name?
         path = args.save_path+SAVE_NAME+str(i+1)+".csv"
         with open(path, "w") as f:
-            group_data.to_csv(f, index = False)
+            subgroup_data.to_csv(f, index = False)
