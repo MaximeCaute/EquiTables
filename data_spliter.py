@@ -22,4 +22,7 @@ def compute_subgroups_indices( data_to_match, data_to_differentiate,
         - groups_indices : int list list. The indices of the elements in each groups.
             The i-th element contains the indices of the elements in group i.
     """
+    ## NOTE : FONCTION RENVOYER PDSERIES avec var indicatrices
+    # Ignorer les lignes non dans sous-groupes
+
     return [range(groups_size),range(groups_size, 2*groups_size)]
