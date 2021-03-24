@@ -64,6 +64,7 @@ if __name__ == "__main__":
     Call example:
         - python3 match.py ToySets/toy_data.csv -mp Value -dp Control -s 2
         - python3 match.py ToySets/toy_data.csv -mp Value -dp Control -s 2 -p results/
+        - python3 match.py ToySets/toy_data_expanded.csv -mp Value -dp "Control;Paradigm1;Paradigm2" -s 2 -p results/
     """
     SAVE_NAME = "data_group"
 
@@ -73,6 +74,7 @@ if __name__ == "__main__":
 
     parameters_to_match = args.matching_parameters.split(";")
     parameters_to_differentiate = args.differentiation_parameters.split(";")
+    print(parameters_to_differentiate)
     data_to_match = dataframe[parameters_to_match]
     data_to_differentiate = dataframe[parameters_to_differentiate]
 
