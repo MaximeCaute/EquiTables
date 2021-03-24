@@ -28,18 +28,25 @@ def compute_subgroups_indices( data_to_match, data_to_differentiate,
     # Ignorer les lignes non dans sous-groupes
     #print(data_to_match)
 
+    groups_indices = [set(data_to_differentiate.index)]
     for differentiation_parameter in data_to_differentiate:
         parameter_dataframe = data_to_differentiate[differentiation_parameter]
 
-        groups_indices = []
+        subgroups_indices = []
         for truth_value in [True,False]:
             differentiated_data_index = data_to_differentiate.index[
                                         parameter_dataframe == truth_value]
 
-            groups_indices.append(differentiated_data_index.to_list())
+            for group_indices in groups_indices:
+                subgroup_indices = group_indices.intersection(differentiated_data_index)
+
+                if subgroup_indices != set():
+                    subgroups_indices.append(subgroup_indices)
+
+        groups_indices = subgroups_indices
 
 
-    subgroups_indices = [group_indices[:groups_size] for group_indices
+    subgroups_indices = [list(group_indices)[:groups_size] for group_indices
                                                     in groups_indices]
 
     return subgroups_indices
