@@ -69,9 +69,6 @@ def compute_subgroups_indices(data_to_match, data_to_differentiate,
     groups_indices = compute_groups_indices(data_to_differentiate)
     num_subgroups = len(groups_indices)
 
-    ## HARD SELECTION FOR 2-Group match -> TODO
-    #groups_indices = groups_indices[0:2]
-
     search_tree = SearchTree(groups_indices, groups_size)
     for tuple_index in range(groups_size):
         for subgroup_index in range(num_subgroups):
