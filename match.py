@@ -41,6 +41,12 @@ def get_arguments():
                         + "Names should match the data column names. "
                         + "Defaults to none.")
 
+    parser.add_argument("-lh", "--local_heuristic_name", type = str,
+                        default = "first_possible",
+                        help = "The name of the local heuristic to use."
+                        + f"Allowed options are {str(ALLOWED_HEURISTIC_NAMES)}."
+                        + f"Defaults to '{str(ALLOWED_HEURISTIC_NAMES[0])}'.")
+
     parser.add_argument("-d", "--delimiter", type = str,
                         default = ";",
                         help = "The delimiter for the .csv data file. "
@@ -66,9 +72,12 @@ if __name__ == "__main__":
         - python3 match.py ToySets/toy_data.csv -mp Value -dp Control -s 2
         - python3 match.py ToySets/toy_data.csv -mp Value -dp Control -s 2 -p results/
         - python3 match.py ToySets/toy_data_expanded.csv -mp Value -dp "Control;Paradigm1;Paradigm2" -s 2 -p results/
+        - python3 match.py ToySets/toy_data_expanded.csv -mp Value -dp "Control;Paradigm1;Paradigm2" -lh first_possible -s 2 -p results/
     """
     SAVE_NAME = "data_group"
     LOCAL_HEURISTIC_NAME = "first_possible"
+    #Note: first is default!
+    ALLOWED_HEURISTIC_NAMES = ['first_possible']
 
     args = get_arguments()
     with args.datafile as datafile:
@@ -80,7 +89,9 @@ if __name__ == "__main__":
     data_to_match = dataframe[parameters_to_match]
     data_to_differentiate = dataframe[parameters_to_differentiate]
 
-    local_heuristic = local_heuristics.get_local_heuristic_by_name(LOCAL_HEURISTIC_NAME)
+    local_heuristic = local_heuristics.get_local_heuristic_by_name(
+            args.local_heuristic_name
+    )
     subgroups_indices = data_spliter.compute_subgroups_indices(
                                     data_to_match,
                                     data_to_differentiate,
