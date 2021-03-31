@@ -68,7 +68,7 @@ if __name__ == "__main__":
         - python3 match.py ToySets/toy_data_expanded.csv -mp Value -dp "Control;Paradigm1;Paradigm2" -s 2 -p results/
     """
     SAVE_NAME = "data_group"
-    LOCAL_HEURISTIC_NAME = "first possible"
+    LOCAL_HEURISTIC_NAME = "first_possible"
 
     args = get_arguments()
     with args.datafile as datafile:

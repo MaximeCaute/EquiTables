@@ -18,19 +18,19 @@ def choose_first_possible(node):
 def get_local_heuristic_by_name(heuristic_name):
     """
     This function retrieves a given local heuristic by its name.
-    If the name is not valid, returns "first possible" heuristic,
+    If the name is not valid, returns "first_possible" heuristic,
     and raises a warning.
     --
     Input:
         - heuristic_name: string. The name of the heuristic.
             Current possible options are:
-                + "first possible".
+                + first_possible.
     Outputs:
         - local_heuristic: local_heuristic. The chosen local heuristic.
-            Is "first possible" heuristic by default for invalid names.
+            Is "first_possible" heuristic by default for invalid names.
 
     """
-    if heuristic_name == "first possible":
+    if heuristic_name == "first_possible":
         return choose_first_possible
     print(f"WARNING: invalid name - {heuristic_name}!")
     return choose_first_possible
