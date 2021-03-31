@@ -7,8 +7,8 @@ Heuristics are functions that take a node and return, in this very order:
     - the chosen element;
     - the index of the subgroup it will be part of;
     - the index of the tuple it will be part of.
+Defined heuristics should be added to the ALLOWED_LOCAL_HEURISTIC_NAMES dictionnary with their name.
 """
-ALLOWED_LOCAL_HEURISTIC_NAMES = ['first_possible']
 
 def choose_first_possible(node):
     for tuple_index, possible_indices_for_subgroups_tuple in enumerate(node.subgroups_possible_indices_tuples):
@@ -16,6 +16,8 @@ def choose_first_possible(node):
             if len(subgroup_possible_indices) > 0 :
                 chosen_element = next(iter(subgroup_possible_indices))
                 return chosen_element, subgroup_index, tuple_index
+
+ALLOWED_LOCAL_HEURISTIC_NAMES = {'first_possible': choose_first_possible}
 
 def get_local_heuristic_by_name(heuristic_name):
     """
@@ -32,7 +34,9 @@ def get_local_heuristic_by_name(heuristic_name):
             Is "first_possible" heuristic by default for invalid names.
 
     """
-    if heuristic_name == "first_possible":
-        return choose_first_possible
-    print(f"WARNING: invalid name - {heuristic_name}!")
-    return choose_first_possible
+    if heuristic_name in ALLOWED_LOCAL_HEURISTIC_NAMES:
+        return ALLOWED_LOCAL_HEURISTIC_NAMES[heuristic_name]
+    default_local_heuristic_name = list(ALLOWED_LOCAL_HEURISTIC_NAMES.keys())[0]
+    print(  f"WARNING: invalid name - {heuristic_name}!\n"+
+            f"Resolving to default heuristic '{default_local_heuristic_name}'.")
+    return ALLOWED_LOCAL_HEURISTIC_NAMES[default_local_heuristic_name]

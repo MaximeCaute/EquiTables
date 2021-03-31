@@ -41,7 +41,7 @@ def get_arguments():
                         + "Names should match the data column names. "
                         + "Defaults to none. ")
 
-    allowed_heuristic_names = local_heuristics.ALLOWED_LOCAL_HEURISTIC_NAMES
+    allowed_heuristic_names = list(local_heuristics.ALLOWED_LOCAL_HEURISTIC_NAMES.keys())
     parser.add_argument("-lh", "--local_heuristic_name", type = str,
                         default = allowed_heuristic_names[0],
                         help = "The name of the local heuristic to use. "
