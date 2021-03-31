@@ -8,6 +8,8 @@ Heuristics are functions that take a node and return, in this very order:
     - the index of the subgroup it will be part of;
     - the index of the tuple it will be part of.
 """
+ALLOWED_LOCAL_HEURISTIC_NAMES = ['first_possible']
+
 def choose_first_possible(node):
     for tuple_index, possible_indices_for_subgroups_tuple in enumerate(node.subgroups_possible_indices_tuples):
         for subgroup_index, subgroup_possible_indices in enumerate(possible_indices_for_subgroups_tuple):

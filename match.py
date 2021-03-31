@@ -34,18 +34,19 @@ def get_arguments():
                         default = "",
                         help = "The parameters to match. Separate with ';'. "
                         + "Names should match the data column names. "
-                        + "Defaults to none.")
+                        + "Defaults to none. ")
     parser.add_argument("-dp", "--differentiation_parameters", type = str,
                         default = "",
                         help = "The parameters to differentiate. Separate with ';'. "
                         + "Names should match the data column names. "
-                        + "Defaults to none.")
+                        + "Defaults to none. ")
 
+    allowed_heuristic_names = local_heuristics.ALLOWED_LOCAL_HEURISTIC_NAMES
     parser.add_argument("-lh", "--local_heuristic_name", type = str,
-                        default = "first_possible",
-                        help = "The name of the local heuristic to use."
-                        + f"Allowed options are {str(ALLOWED_HEURISTIC_NAMES)}."
-                        + f"Defaults to '{str(ALLOWED_HEURISTIC_NAMES[0])}'.")
+                        default = allowed_heuristic_names[0],
+                        help = "The name of the local heuristic to use. "
+                        + f"Allowed options are {str(allowed_heuristic_names)}. "
+                        + f"Defaults to '{str(allowed_heuristic_names[0])}'. ")
 
     parser.add_argument("-d", "--delimiter", type = str,
                         default = ";",
@@ -54,12 +55,12 @@ def get_arguments():
     parser.add_argument("-s", "--subset_size", type = int,
                         default = "50",
                         help = "The size of the data subset to return. "
-                        + "Defaults to 50")
+                        + "Defaults to 50.")
     parser.add_argument("-p", "--save_path", type = str,
                         default = "",
                         help = "The path to where to save the results, "
                         +"from the current folder. "
-                        +"Defaults to current folder.")
+                        +"Defaults to current folder. ")
     args = parser.parse_args()
     return args
 
@@ -75,9 +76,6 @@ if __name__ == "__main__":
         - python3 match.py ToySets/toy_data_expanded.csv -mp Value -dp "Control;Paradigm1;Paradigm2" -lh first_possible -s 2 -p results/
     """
     SAVE_NAME = "data_group"
-    LOCAL_HEURISTIC_NAME = "first_possible"
-    #Note: first is default!
-    ALLOWED_HEURISTIC_NAMES = ['first_possible']
 
     args = get_arguments()
     with args.datafile as datafile:
