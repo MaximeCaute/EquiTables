@@ -15,6 +15,7 @@ import argparse
 import pandas
 
 import data_spliter
+import local_heuristics
 
 def get_arguments():
     """
@@ -67,12 +68,7 @@ if __name__ == "__main__":
         - python3 match.py ToySets/toy_data_expanded.csv -mp Value -dp "Control;Paradigm1;Paradigm2" -s 2 -p results/
     """
     SAVE_NAME = "data_group"
-    def LOCAL_HEURISTIC(node) :
-        for tuple_index, possible_indices_for_subgroups_tuple in enumerate(node.subgroups_possible_indices_tuples):
-            for subgroup_index, subgroup_possible_indices in enumerate(possible_indices_for_subgroups_tuple):
-                if len(subgroup_possible_indices) > 0 :
-                    chosen_element_index = next(iter(subgroup_possible_indices))
-                    return chosen_element_index, subgroup_index, tuple_index
+    LOCAL_HEURISTIC_NAME = "first possible"
 
     args = get_arguments()
     with args.datafile as datafile:
@@ -84,10 +80,11 @@ if __name__ == "__main__":
     data_to_match = dataframe[parameters_to_match]
     data_to_differentiate = dataframe[parameters_to_differentiate]
 
+    local_heuristic = local_heuristics.get_local_heuristic_by_name(LOCAL_HEURISTIC_NAME)
     subgroups_indices = data_spliter.compute_subgroups_indices(
                                     data_to_match,
                                     data_to_differentiate,
-                                    LOCAL_HEURISTIC,
+                                    local_heuristic,
                                     groups_size = args.subset_size)
 
     for i, subgroup_indices in enumerate(subgroups_indices):
