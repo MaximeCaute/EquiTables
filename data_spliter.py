@@ -38,6 +38,7 @@ def compute_groups_indices(data_to_differentiate):
     return groups_indices
 
 def compute_subgroups_indices(data_to_match, data_to_differentiate,
+                            local_heuristic,
                             groups_size = 2):
     """
     This function computes indices for groups based on data.
@@ -61,7 +62,6 @@ def compute_subgroups_indices(data_to_match, data_to_differentiate,
             The i-th element contains the indices of the selected elements in subgroup i.
     """
     NUM_GROUPS = 2
-    HEURISTIC = lambda s: next(iter(s)) #gets an element of the set #perhaps not clean to use sets?
 
     ## NOTE : RETURN PDSERIES?
     #Ignore lines not in subgroup
@@ -70,16 +70,13 @@ def compute_subgroups_indices(data_to_match, data_to_differentiate,
     num_subgroups = len(groups_indices)
 
     search_tree = SearchTree(groups_indices, groups_size)
-    for tuple_index in range(groups_size):
-        for subgroup_index in range(num_subgroups):
-            chosen_element_index = search_tree.current_node.compute_index_in_subgroup_in_tuple_with_local_heuristic(
-                    HEURISTIC,
-                    subgroup_index,
-                    tuple_index
-            )
-            search_tree.decide_index_for_subgroup_in_tuple_from_current_node(
-                chosen_element_index, subgroup_index, tuple_index
-            )
+    for i in range(groups_size*num_subgroups):
+        chosen_element_index, subgroup_index, tuple_index = local_heuristic(
+                search_tree.current_node
+        )
+        search_tree.decide_index_for_subgroup_in_tuple_from_current_node(
+            chosen_element_index, subgroup_index, tuple_index
+        )
     subgroups_indices_tuples = search_tree.get_current_solution()
 
     subgroups_elements_indices = [[] for i in range(num_subgroups)]
