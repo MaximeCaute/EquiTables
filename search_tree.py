@@ -5,12 +5,16 @@ Created: 17.03.2021
 
 This file is dedicated to implementation of search trees.
 """
+import numpy as np
+import metrics
+
 class SearchTree():
-    def __init__(self, groups_indices, subgroups_size):
+    def __init__(self, groups_indices, subgroups_size, base_dataframe):
         self.num_nodes = 1
         self.root = PossibleSubgroupsNode(groups_indices, subgroups_size, id = self.num_nodes-1)
         self.mothers_by_nodes = {}
         self.current_node = self.root
+        self.base_dataframe = base_dataframe
 
 
     def __str__(self):
@@ -29,7 +33,8 @@ class SearchTree():
                                                             tuple_index
                                                             ):
         new_node = self.current_node.decide_index_for_subgroup_in_tuple(
-                index, subgroup_index, tuple_index, new_node_id = self.num_nodes
+                index, subgroup_index, tuple_index, self.base_dataframe,
+                new_node_id = self.num_nodes
         )
         self.add_node(new_node, self.current_node)
         self.current_node = new_node
@@ -49,7 +54,7 @@ class PossibleSubgroupsNode():
         ]
 
         self.id = str(id)
-
+        self.internal_distance = -1
 
     def copy(self, copy_id=""):
         copy_node = PossibleSubgroupsNode([1],1, id = copy_id)
@@ -63,6 +68,11 @@ class PossibleSubgroupsNode():
     def __str__(self):
         return f"[Node{self.id} <- {self.subgroups_chosen_indices_tuples} <- {self.subgroups_possible_indices_tuples}]"
 
+    #################################
+
+    def is_leaf(self):
+        return not np.any(np.asarray(self.subgroups_chosen_indices_tuples) == -1)
+
     #subgroup index is not necessary, but hopefully only fastens computation
     #beware of not having on index for two subgroups
     #DO a none case?
@@ -71,11 +81,22 @@ class PossibleSubgroupsNode():
             subgroups_possible_indices[subgroup_index].discard(index)
 
 
-    def decide_index_for_subgroup_in_tuple(self, chosen_element_index, subgroup_index, tuple_index, new_node_id =""):
+    def decide_index_for_subgroup_in_tuple(self,
+                chosen_element_index,
+                subgroup_index, tuple_index,
+                base_dataframe,
+                new_node_id =""):
         new_node = self.copy(copy_id=new_node_id)
         new_node.subgroups_possible_indices_tuples[tuple_index][subgroup_index] = set()
         new_node.subgroups_chosen_indices_tuples[tuple_index][subgroup_index] = chosen_element_index
         new_node.discard_possible_index(chosen_element_index, subgroup_index)
+
+        if new_node.is_leaf():
+            new_node.internal_distance = metrics.compute_distance_between_subgroups(
+                new_node.subgroups_chosen_indices_tuples,
+                base_dataframe
+            )
+
         return new_node
 
     def compute_index_in_subgroup_in_tuple_with_local_heuristic(

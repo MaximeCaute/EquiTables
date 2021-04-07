@@ -69,7 +69,7 @@ def compute_subgroups_indices(data_to_match, data_to_differentiate,
     groups_indices = compute_groups_indices(data_to_differentiate)
     num_subgroups = len(groups_indices)
 
-    search_tree = SearchTree(groups_indices, groups_size)
+    search_tree = SearchTree(groups_indices, groups_size, data_to_match)
     for i in range(groups_size*num_subgroups):
         chosen_element_index, subgroup_index, tuple_index = local_heuristic(
                 search_tree.current_node
