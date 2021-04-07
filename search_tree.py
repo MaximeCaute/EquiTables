@@ -43,6 +43,14 @@ class SearchTree():
     def get_current_solution(self):
         return self.current_node.subgroups_chosen_indices_tuples
 
+    def step_forward(self, local_heuristic):
+        chosen_element_index, subgroup_index, tuple_index = local_heuristic(
+                self.current_node
+        )
+        self.decide_index_for_subgroup_in_tuple_from_current_node(
+            chosen_element_index, subgroup_index, tuple_index
+        )
+
     def backtrack(self):
         origin_node = self.current_node
         self.current_node = self.mothers_by_nodes[origin_node]
@@ -51,6 +59,8 @@ class SearchTree():
             self.current_node.internal_distance = origin_node.internal_distance
             self.current_node.solution = origin_node.solution
             self.current_node.remove_decision(origin_node.indices_decision)
+
+
 
 
 

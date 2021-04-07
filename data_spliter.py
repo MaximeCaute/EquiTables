@@ -71,12 +71,7 @@ def compute_subgroups_indices(data_to_match, data_to_differentiate,
 
     search_tree = SearchTree(groups_indices, groups_size, data_to_match)
     for i in range(groups_size*num_subgroups):
-        chosen_element_index, subgroup_index, tuple_index = local_heuristic(
-                search_tree.current_node
-        )
-        search_tree.decide_index_for_subgroup_in_tuple_from_current_node(
-            chosen_element_index, subgroup_index, tuple_index
-        )
+        search_tree.step_forward(local_heuristic)
     subgroups_indices_tuples = search_tree.get_current_solution()
 
     for i in range(groups_size*num_subgroups):
