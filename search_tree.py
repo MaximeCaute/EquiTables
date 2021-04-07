@@ -9,10 +9,12 @@ import numpy as np
 import metrics
 import copy
 
+ROOT_ID = "root"
+
 class SearchTree():
     def __init__(self, groups_indices, subgroups_size, base_dataframe):
         self.num_nodes = 1
-        self.root = PossibleSubgroupsNode(groups_indices, subgroups_size, id = "root")
+        self.root = PossibleSubgroupsNode(groups_indices, subgroups_size, id = ROOT_ID)
         self.mothers_by_nodes = {}
         self.current_node = self.root
         self.base_dataframe = base_dataframe
@@ -47,18 +49,32 @@ class SearchTree():
         chosen_element_index, subgroup_index, tuple_index = local_heuristic(
                 self.current_node
         )
+        #TODO check validity
         self.decide_index_for_subgroup_in_tuple_from_current_node(
             chosen_element_index, subgroup_index, tuple_index
         )
 
     def backtrack(self):
+
         origin_node = self.current_node
         self.current_node = self.mothers_by_nodes[origin_node]
 
-        if self.current_node.internal_distance < origin_node.internal_distance:
+        if self.current_node.internal_distance > origin_node.internal_distance:
             self.current_node.internal_distance = origin_node.internal_distance
             self.current_node.solution = origin_node.solution
-            self.current_node.remove_decision(origin_node.indices_decision)
+        self.current_node.remove_decision(origin_node.indices_decision)
+
+    def search_step(self,   local_heuristic = lambda x: (0,0,0),
+                            global_heuristic = lambda x: True):
+        is_at_root = self.current_node.id == ROOT_ID
+        is_at_leaf = self.current_node.is_leaf()
+
+        if not is_at_leaf and global_heuristic(self.current_node):
+            self.step_forward(local_heuristic)
+        elif not is_at_root:
+            self.backtrack()
+        else:
+            print("Warning: did not move for current step!")
 
 
 
@@ -96,7 +112,7 @@ class PossibleSubgroupsNode():
     #################################
 
     def is_leaf(self):
-        return not np.any(np.asarray(self.subgroups_chosen_indices_tuples) == -1)
+        return np.all(np.asarray(self.subgroups_possible_indices_tuples) == set())
 
     #subgroup index is not necessary, but hopefully only fastens computation
     #beware of not having on index for two subgroups
