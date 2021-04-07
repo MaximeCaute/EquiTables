@@ -11,7 +11,7 @@ import metrics
 class SearchTree():
     def __init__(self, groups_indices, subgroups_size, base_dataframe):
         self.num_nodes = 1
-        self.root = PossibleSubgroupsNode(groups_indices, subgroups_size, id = self.num_nodes-1)
+        self.root = PossibleSubgroupsNode(groups_indices, subgroups_size, id = "root")
         self.mothers_by_nodes = {}
         self.current_node = self.root
         self.base_dataframe = base_dataframe
@@ -42,6 +42,18 @@ class SearchTree():
     def get_current_solution(self):
         return self.current_node.subgroups_chosen_indices_tuples
 
+    def backtrack(self):
+        origin_node = self.current_node
+        self.current_node = self.mothers_by_nodes[origin_node]
+
+        if self.current_node.internal_distance < origin_node.internal_distance:
+            self.current_node.internal_distance = origin_node.internal_distance
+            self.current_node.solution = origin_node.solution
+            self.current_node.remove_decision(origin_node.indices_decision)
+
+
+
+
 
 class PossibleSubgroupsNode():
     def __init__(self, indices_sets_for_groups, subgroups_size, id =""):
@@ -55,6 +67,8 @@ class PossibleSubgroupsNode():
 
         self.id = str(id)
         self.internal_distance = -1
+        self.solution = None
+        self.indices_decision = (-1,-1,-1)
 
     def copy(self, copy_id=""):
         copy_node = PossibleSubgroupsNode([1],1, id = copy_id)
@@ -80,6 +94,10 @@ class PossibleSubgroupsNode():
         for subgroups_possible_indices in self.subgroups_possible_indices_tuples:
             subgroups_possible_indices[subgroup_index].discard(index)
 
+    #factoriser les deux?
+    def remove_decision(self, decision):
+        tuple_index, group_index, element_index = decision
+        self.subgroups_possible_indices_tuples[tuple_index][group_index].discard(element_index)
 
     def decide_index_for_subgroup_in_tuple(self,
                 chosen_element_index,
@@ -89,6 +107,7 @@ class PossibleSubgroupsNode():
         new_node = self.copy(copy_id=new_node_id)
         new_node.subgroups_possible_indices_tuples[tuple_index][subgroup_index] = set()
         new_node.subgroups_chosen_indices_tuples[tuple_index][subgroup_index] = chosen_element_index
+        new_node.indices_decision = (tuple_index, subgroup_index, chosen_element_index)
         new_node.discard_possible_index(chosen_element_index, subgroup_index)
 
         if new_node.is_leaf():
@@ -96,6 +115,7 @@ class PossibleSubgroupsNode():
                 new_node.subgroups_chosen_indices_tuples,
                 base_dataframe
             )
+            new_node.solution = new_node.subgroups_chosen_indices_tuples
 
         return new_node
 
