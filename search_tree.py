@@ -7,6 +7,7 @@ This file is dedicated to implementation of search trees.
 """
 import numpy as np
 import metrics
+import copy
 
 class SearchTree():
     def __init__(self, groups_indices, subgroups_size, base_dataframe):
@@ -57,9 +58,8 @@ class SearchTree():
 
 class PossibleSubgroupsNode():
     def __init__(self, indices_sets_for_groups, subgroups_size, id =""):
-
         self.subgroups_possible_indices_tuples = [
-                indices_sets_for_groups.copy() for i in range(subgroups_size)
+                copy.deepcopy(indices_sets_for_groups) for i in range(subgroups_size)
         ]
         self.subgroups_chosen_indices_tuples = [
                 [-1]*len(indices_sets_for_groups) for i in range(subgroups_size)
@@ -72,15 +72,16 @@ class PossibleSubgroupsNode():
 
     def copy(self, copy_id=""):
         copy_node = PossibleSubgroupsNode([1],1, id = copy_id)
-        copy_node.subgroups_possible_indices_tuples = self.subgroups_possible_indices_tuples.copy()
-        copy_node.subgroups_chosen_indices_tuples = self.subgroups_chosen_indices_tuples.copy()
+        copy_node.subgroups_possible_indices_tuples = copy.deepcopy(self.subgroups_possible_indices_tuples)
+        copy_node.subgroups_chosen_indices_tuples = copy.deepcopy(self.subgroups_chosen_indices_tuples)
         return copy_node
 
     def __repr__(self):
-        return f"Node{self.id}"
+        return f"Node {self.id}"
 
     def __str__(self):
-        return f"[Node{self.id} <- {self.subgroups_chosen_indices_tuples} <- {self.subgroups_possible_indices_tuples}]"
+        return (f"[Node {self.id} <- {self.subgroups_chosen_indices_tuples} <- {self.subgroups_possible_indices_tuples}; "
+                f"internal_distance = {self.internal_distance}]")
 
     #################################
 
