@@ -1,68 +1,62 @@
+#! /usr/bin/env python
 """
 Author(s): Maxime Cauté
 Created: 03.03.2021
+Modifs:  Time-stamp: <2021-04-12 15:39:30 christophe@pallier.org>
 
 This file is the main .py file for the match program.
 Github repository: https://github.com/MaximeCaute/Equitables
-
-The input to the program should be as follow:
-    - a .csv file containing all the data with the relevant information;
-    - a .txt file listing out parameters to match;
-    - a .txt file listing out parameters to differentiate;
 """
 
+import os.path as op
 import argparse
-import pandas
+import pandas as pd
 
-import data_spliter
 import local_heuristics
+from search_tree import SearchTree
+
+
+def split_by_labels(df, factors):
+    """ split dataframe df according to the subgroups obtained by crossing the columns listed in factors """
+    x = df[factors].astype(str).agg('-'.join, axis=1)  # merge columns
+    return df.groupby(x)
+
+
+def find_matched_subgroups(groups,
+                           columns_to_match,
+                           local_heuristic,
+                           subgroup_size=2):
+    """
+    Extract subgroups' from a list of data.frames (groups), matched on `columns_to_match`
+
+    Input:
+        - groups :  list of pandas DataFrame
+
+    Parameters:
+        - subgroup_size: int     size of the subgroups to extract.
+
+    Outputs:
+        a list of dataframes of length subgroup_size
+
+    """
+    #### TBD  # needs modificatoins in searchtree
+
+    # search_tree = SearchTree(groups, subgroup_size)
+    # for i in range(subgroups_size * len(groups):
+    #     chosen_element_index, subgroup_index, tuple_index = local_heuristic(
+    #             search_tree.current_node
+    #     )
+    #     search_tree.decide_index_for_subgroup_in_tuple_from_current_node(
+    #         chosen_element_index, subgroup_index, tuple_index
+    #     )
+    # subgroups = search_tree.get_current_solution()
+    subgroups = groups  # no selection"
+    return subgroups
+
 
 def get_arguments():
-    """
-    This function parses command line arguments.
-    --
-    Output:
-        - args: list. The list of the arguments.
-    """
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("datafile", type = argparse.FileType('r'),
-                        help = "The data to select matching sets from. Should follow .csv format.")
-
-    # Optional arguments
-    parser.add_argument("-mp", "--matching_parameters", type = str,
-                        default = "",
-                        help = "The parameters to match. Separate with ';'. "
-                        + "Names should match the data column names. "
-                        + "Defaults to none. ")
-    parser.add_argument("-dp", "--differentiation_parameters", type = str,
-                        default = "",
-                        help = "The parameters to differentiate. Separate with ';'. "
-                        + "Names should match the data column names. "
-                        + "Defaults to none. ")
-
-    allowed_heuristic_names = list(local_heuristics.ALLOWED_LOCAL_HEURISTIC_NAMES.keys())
-    parser.add_argument("-lh", "--local_heuristic_name", type = str,
-                        default = allowed_heuristic_names[0],
-                        help = "The name of the local heuristic to use. "
-                        + f"Allowed options are {str(allowed_heuristic_names)}. "
-                        + f"Defaults to '{str(allowed_heuristic_names[0])}'. ")
-
-    parser.add_argument("-d", "--delimiter", type = str,
-                        default = ";",
-                        help = "The delimiter for the .csv data file. "
-                        + "Defaults to ';'.")
-    parser.add_argument("-s", "--subset_size", type = int,
-                        default = "50",
-                        help = "The size of the data subset to return. "
-                        + "Defaults to 50.")
-    parser.add_argument("-p", "--save_path", type = str,
-                        default = "",
-                        help = "The path to where to save the results, "
-                        +"from the current folder. "
-                        +"Defaults to current folder. ")
-    args = parser.parse_args()
     return args
+
 
 if __name__ == "__main__":
     """
@@ -70,36 +64,79 @@ if __name__ == "__main__":
 
     ---
     Call example:
-        - python3 match.py ToySets/toy_data.csv -mp Value -dp Control -s 2
-        - python3 match.py ToySets/toy_data.csv -mp Value -dp Control -s 2 -p results/
-        - python3 match.py ToySets/toy_data_expanded.csv -mp Value -dp "Control;Paradigm1;Paradigm2" -s 2 -p results/
-        - python3 match.py ToySets/toy_data_expanded.csv -mp Value -dp "Control;Paradigm1;Paradigm2" -lh first_possible -s 2 -p results/
+        - python3 match.py ToySets/toy_data.csv -m Value -g Control -s 2
+        - python3 match.py ToySets/toy_data.csv -m Value -g Control -s 2 -p results/
+        - python3 match.py ToySets/toy_data_expanded.csv -m Value -g "Control;Paradigm1;Paradigm2" -s 2 -p results/
+        - python3 match.py ToySets/toy_data_expanded.csv -m Value -g "Control;Paradigm1;Paradigm2" -l first_possible -s 2 -p results/
     """
-    SAVE_NAME = "data_group"
 
-    args = get_arguments()
-    with args.datafile as datafile:
-        dataframe = pandas.read_csv(datafile, sep = args.delimiter)
+    parser = argparse.ArgumentParser(add_help=False)
 
-    parameters_to_match = args.matching_parameters.split(";")
-    parameters_to_differentiate = args.differentiation_parameters.split(";")
+    required = parser.add_argument_group('required arguments')
+    optional = parser.add_argument_group('optional arguments')
 
-    data_to_match = dataframe[parameters_to_match]
-    data_to_differentiate = dataframe[parameters_to_differentiate]
+    required.add_argument("DATAFILE",
+                          type=argparse.FileType('r'),
+                          help="Acsv datafile to select matching sets from.")
+
+    required.add_argument("-m",
+                          "--match",
+                          type=str,
+                          help="variables to match. Separate with ';'. " +
+                          "Names should match the data column names. ",
+                          required=True)
+    required.add_argument("-g",
+                          "--group",
+                          type=str,
+                          help="grouping variables. Separate with ';'. " +
+                          "Names should match the data column names. ",
+                          required=True)
+    required.add_argument("-s",
+                          "--subset_size",
+                          type=int,
+                          help="The size of the data subset to return. ",
+                          required=True)
+
+    allowed_heuristic_names = list(
+        local_heuristics.ALLOWED_LOCAL_HEURISTIC_NAMES.keys())
+    optional.add_argument(
+        "-h",
+        "--local_heuristic_name",
+        type=str,
+        default=allowed_heuristic_names[0],
+        help="The name of the local heuristic to use. " +
+        f"Allowed options are {str(allowed_heuristic_names)}. " +
+        f"Defaults to '{str(allowed_heuristic_names[0])}'. ")
+
+    optional.add_argument("-d",
+                          "--delimiter",
+                          type=str,
+                          default=";",
+                          help="The delimiter for the .csv data file. " +
+                          "Defaults to ';'.")
+    optional.add_argument("-p",
+                          "--save_path",
+                          type=str,
+                          default="",
+                          help="The path to where to save the results, " +
+                          "from the current folder. " +
+                          "Defaults to current folder. ")
+    args = parser.parse_args()
+
+    df = pd.read_csv(args.DATAFILE, sep=args.delimiter)
+    variables_to_match = args.match.split(";")
+    grouping_factors = args.group.split(";")
+    subsets_size = args.subset_size
 
     local_heuristic = local_heuristics.get_local_heuristic_by_name(
-            args.local_heuristic_name
-    )
-    subgroups_indices = data_spliter.compute_subgroups_indices(
-                                    data_to_match,
-                                    data_to_differentiate,
-                                    local_heuristic,
-                                    groups_size = args.subset_size)
+        args.local_heuristic_name)
 
-    for i, subgroup_indices in enumerate(subgroups_indices):
-        subgroup_data = dataframe.iloc[subgroup_indices]
+    groups = split_by_labels(df, grouping_factors)
 
-        #More explicit name?
-        path = args.save_path+SAVE_NAME+str(i+1)+".csv"
-        with open(path, "w") as f:
-            subgroup_data.to_csv(f, index = False)
+    subgroups = find_matched_subgroups(groups,
+                                       variables_to_match,
+                                       local_heuristic,
+                                       subsets_size)
+
+    for i, subgroup in enumerate(subgroups):
+        pd.DataFrame(subgroup).to_csv(op.join(args.save_path, f'subgroup_{i + 1:02d}.csv'))
