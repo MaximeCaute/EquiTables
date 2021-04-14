@@ -9,10 +9,12 @@ import numpy as np
 import metrics
 import copy
 
+ROOT_ID = "root"
+
 class SearchTree():
     def __init__(self, groups_indices, subgroups_size, base_dataframe):
         self.num_nodes = 1
-        self.root = PossibleSubgroupsNode(groups_indices, subgroups_size, id = "root")
+        self.root = PossibleSubgroupsNode(groups_indices, subgroups_size, id = ROOT_ID)
         self.mothers_by_nodes = {}
         self.current_node = self.root
         self.base_dataframe = base_dataframe
@@ -41,19 +43,56 @@ class SearchTree():
         self.current_node = new_node
 
     def get_current_solution(self):
-        return self.current_node.subgroups_chosen_indices_tuples
+        return self.current_node.solution
+
+    def step_forward(self, local_heuristic):
+        chosen_element_index, subgroup_index, tuple_index = local_heuristic(
+                self.current_node
+        )
+        #TODO check validity
+        self.decide_index_for_subgroup_in_tuple_from_current_node(
+            chosen_element_index, subgroup_index, tuple_index
+        )
 
     def backtrack(self):
         origin_node = self.current_node
         self.current_node = self.mothers_by_nodes[origin_node]
 
-        if self.current_node.internal_distance < origin_node.internal_distance:
+        if origin_node.has_better_distance_than(self.current_node):
             self.current_node.internal_distance = origin_node.internal_distance
             self.current_node.solution = origin_node.solution
-            self.current_node.remove_decision(origin_node.indices_decision)
+        self.current_node.remove_decision(origin_node.indices_decision)
 
+    def backtrack_to_root(self):
+        while not self.current_node.is_root():
+            print("backtrack", self.current_node)
+            self.backtrack()
 
+    def search_step_and_confirm(self,   local_heuristic = lambda x: (0,0,0),
+                                        global_heuristic = lambda x: True):
+        is_at_root = self.current_node.is_root()
+        is_at_end_of_branch = self.current_node.is_end_of_branch()
 
+        if not is_at_end_of_branch and global_heuristic(self.current_node):
+            self.step_forward(local_heuristic)
+            return True
+        if not is_at_root:
+            self.backtrack()
+            return True
+        return False
+
+    def search_and_get_solution(self,       local_heuristic = lambda x: (0,0,0),
+                                            global_heuristic = lambda x: True,
+                                            max_iterations = 10000):
+        stop_search = False
+        for num_iterations in range(max_iterations):
+            print(num_iterations, self.current_node)
+            searched_step = self.search_step_and_confirm(local_heuristic, global_heuristic)
+            if not searched_step:
+                break
+
+        self.backtrack_to_root()
+        return self.get_current_solution()
 
 
 class PossibleSubgroupsNode():
@@ -81,12 +120,23 @@ class PossibleSubgroupsNode():
 
     def __str__(self):
         return (f"[Node {self.id} <- {self.subgroups_chosen_indices_tuples} <- {self.subgroups_possible_indices_tuples}; "
-                f"internal_distance = {self.internal_distance}]")
+                f"Solution: {self.solution}; internal_distance = {self.internal_distance}]")
 
     #################################
 
     def is_leaf(self):
-        return not np.any(np.asarray(self.subgroups_chosen_indices_tuples) == -1)
+        return np.all(np.asarray(self.subgroups_chosen_indices_tuples) != -1)
+    def is_end_of_branch(self):
+        return np.all(np.asarray(self.subgroups_possible_indices_tuples) == set())
+    def is_root(self):
+        return self.id == ROOT_ID
+
+    def has_better_distance_than(self, target_node):
+        if self.internal_distance < 0:
+            return False
+        if target_node.internal_distance < 0:
+            return True
+        return self.internal_distance < target_node.internal_distance
 
     #subgroup index is not necessary, but hopefully only fastens computation
     #beware of not having on index for two subgroups
@@ -109,6 +159,8 @@ class PossibleSubgroupsNode():
         new_node.subgroups_possible_indices_tuples[tuple_index][subgroup_index] = set()
         new_node.subgroups_chosen_indices_tuples[tuple_index][subgroup_index] = chosen_element_index
         new_node.indices_decision = (tuple_index, subgroup_index, chosen_element_index)
+        new_node.internal_distance = -1
+        new_node.solution = None
         new_node.discard_possible_index(chosen_element_index, subgroup_index)
 
         if new_node.is_leaf():
@@ -117,7 +169,6 @@ class PossibleSubgroupsNode():
                 base_dataframe
             )
             new_node.solution = new_node.subgroups_chosen_indices_tuples
-
         return new_node
 
     def compute_index_in_subgroup_in_tuple_with_local_heuristic(
