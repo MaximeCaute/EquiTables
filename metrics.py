@@ -7,7 +7,23 @@ This file is dedicated to the implementation of metrics for solutions.
 import numpy as np
 import itertools
 
+
 EUCLIDIAN_DISTANCE = lambda a,b : np.linalg.norm(a-b)
+
+def remove_wrong_indices_in_tuple(tuple):
+    valid_indices = []
+    for i, element in enumerate(tuple):
+        if element != -1:
+            valid_indices.append(i)
+    return [tuple[i] for i in valid_indices]
+
+def remove_wrong_indices_in_tuple_pair(tuple1, tuple2):
+    valid_indices = []
+    for i, element in enumerate(tuple1):
+        if element != -1 and tuple2[i] != -1:
+            valid_indices.append(i)
+    return [tuple1[i] for i in valid_indices], [tuple2[i] for i in valid_indices]
+
 
 def compute_distance_from_tuples_and_group_indices(
                 baseline_tuple,
@@ -79,7 +95,7 @@ def compute_distance_within_tuple(  element_indices_per_subgroup__tuple,
     distance = 0
 
     for baseline_group_index, target_group_index in itertools.combinations(subgroups_indices, 2):
-        tuple =  element_indices_per_subgroup__tuple,
+        tuple =  remove_wrong_indices(element_indices_per_subgroup__tuple)
         distance = add_modified_distance_from_tuples_and_group_indices(
             distance,
             tuple, tuple,
