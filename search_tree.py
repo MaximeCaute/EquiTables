@@ -110,8 +110,9 @@ class SearchTree():
 
     def get_current_subgroup_dataframe(self):
         solution = self.get_current_solution()
+        original_indices = set(self.base_dataframe.apply(lambda x: x).index)
         selected_indices = set(np.asarray(solution).flatten())
-        dropped_indices = set([7])
+        dropped_indices = original_indices - selected_indices
 
         solution_dataframe = self.base_dataframe.apply(
             lambda x: x.drop(dropped_indices.intersection(x.index))
