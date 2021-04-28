@@ -17,9 +17,11 @@ from search_tree import SearchTree
 
 
 def split_by_labels(df, factors):
-    """ split dataframe df according to the subgroups obtained by crossing the columns listed in factors """
+    """ split dataframe df according to
+    the subgroups obtained by crossing the columns listed in factors
+    and drop factors"""
     x = df[factors].astype(str).agg('-'.join, axis=1)  # merge columns
-    return df.groupby(x)
+    return df.drop(factors, axis=1).groupby(x)
 
 
 def find_matched_subgroups(groups,
@@ -41,16 +43,9 @@ def find_matched_subgroups(groups,
     """
     #### TBD  # needs modificatoins in searchtree
 
-    # search_tree = SearchTree(groups, subgroup_size)
-    # for i in range(subgroups_size * len(groups):
-    #     chosen_element_index, subgroup_index, tuple_index = local_heuristic(
-    #             search_tree.current_node
-    #     )
-    #     search_tree.decide_index_for_subgroup_in_tuple_from_current_node(
-    #         chosen_element_index, subgroup_index, tuple_index
-    #     )
-    # subgroups = search_tree.get_current_solution()
-    subgroups = groups  # no selection"
+    search_tree = SearchTree(groups, subgroup_size)
+    subgroups = search_tree.search_and_get_solution(local_heuristic = local_heuristic)
+    # subgroups = groups  # no selection"
     return subgroups
 
 
@@ -67,7 +62,7 @@ if __name__ == "__main__":
         - python3 match.py ToySets/toy_data.csv -m Value -g Control -s 2
         - python3 match.py ToySets/toy_data.csv -m Value -g Control -s 2 -p results/
         - python3 match.py ToySets/toy_data_expanded.csv -m Value -g "Control;Paradigm1;Paradigm2" -s 2 -p results/
-        - python3 match.py ToySets/toy_data_expanded.csv -m Value -g "Control;Paradigm1;Paradigm2" -l first_possible -s 2 -p results/
+        - python3 match.py ToySets/toy_data_expanded.csv -m Value -g "Control;Paradigm1;Paradigm2" -h first_possible -s 2 -p results/
     """
 
     parser = argparse.ArgumentParser(add_help=False)

@@ -11,13 +11,26 @@ import copy
 
 ROOT_ID = "root"
 
+def convert_groups_dataframe_to_indices_sets_for_groups(groups_dataframe):
+    if groups_dataframe is None:
+        return [set([1])]
+    dataframe_for_groups= [
+        groups_dataframe.get_group(group_id) for group_id
+                                             in groups_dataframe.indices.keys()
+    ]
+    indices_sets_for_groups = [
+        set(dataframe.index) for dataframe in dataframe_for_groups
+    ]
+    return indices_sets_for_groups
+
+
 class SearchTree():
-    def __init__(self, groups_indices, subgroups_size, base_dataframe):
+    def __init__(self, groups_dataframe, subgroups_size):
         self.num_nodes = 1
-        self.root = PossibleSubgroupsNode(groups_indices, subgroups_size, id = ROOT_ID)
+        self.root = PossibleSubgroupsNode(groups_dataframe, subgroups_size, id = ROOT_ID)
         self.mothers_by_nodes = {}
         self.current_node = self.root
-        self.base_dataframe = base_dataframe
+        self.base_dataframe = groups_dataframe
 
 
     def __str__(self):
@@ -65,7 +78,7 @@ class SearchTree():
 
     def backtrack_to_root(self):
         while not self.current_node.is_root():
-            print("backtrack", self.current_node)
+            #print("backtrack", self.current_node)
             self.backtrack()
 
     def search_step_and_confirm(self,   local_heuristic = lambda x: (0,0,0),
@@ -86,7 +99,7 @@ class SearchTree():
                                             max_iterations = 10000):
         stop_search = False
         for num_iterations in range(max_iterations):
-            print(num_iterations, self.current_node)
+            #print(num_iterations, self.current_node)
             searched_step = self.search_step_and_confirm(local_heuristic, global_heuristic)
             if not searched_step:
                 break
@@ -96,13 +109,15 @@ class SearchTree():
 
 
 class PossibleSubgroupsNode():
-    def __init__(self, indices_sets_for_groups, subgroups_size, id =""):
+    def __init__(self, groups_dataframe, subgroups_size, id =""):
+        indices_sets_for_groups = convert_groups_dataframe_to_indices_sets_for_groups(groups_dataframe)
         self.subgroups_possible_indices_tuples = [
                 copy.deepcopy(indices_sets_for_groups) for i in range(subgroups_size)
         ]
         self.subgroups_chosen_indices_tuples = [
                 [-1]*len(indices_sets_for_groups) for i in range(subgroups_size)
         ]
+        self.groups_dataframe = groups_dataframe
 
         self.id = str(id)
         self.internal_distance = -1
@@ -110,7 +125,7 @@ class PossibleSubgroupsNode():
         self.indices_decision = (-1,-1,-1)
 
     def copy(self, copy_id=""):
-        copy_node = PossibleSubgroupsNode([1],1, id = copy_id)
+        copy_node = PossibleSubgroupsNode(None,1, id = copy_id)
         copy_node.subgroups_possible_indices_tuples = copy.deepcopy(self.subgroups_possible_indices_tuples)
         copy_node.subgroups_chosen_indices_tuples = copy.deepcopy(self.subgroups_chosen_indices_tuples)
         return copy_node
@@ -153,7 +168,7 @@ class PossibleSubgroupsNode():
     def decide_index_for_subgroup_in_tuple(self,
                 chosen_element_index,
                 subgroup_index, tuple_index,
-                base_dataframe,
+                groups_dataframe,
                 new_node_id =""):
         new_node = self.copy(copy_id=new_node_id)
         new_node.subgroups_possible_indices_tuples[tuple_index][subgroup_index] = set()
@@ -166,7 +181,7 @@ class PossibleSubgroupsNode():
         if new_node.is_leaf():
             new_node.internal_distance = metrics.compute_distance_between_subgroups(
                 new_node.subgroups_chosen_indices_tuples,
-                base_dataframe
+                groups_dataframe#base_dataframe
             )
             new_node.solution = new_node.subgroups_chosen_indices_tuples
         return new_node
