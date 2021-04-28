@@ -11,6 +11,9 @@ Heuristics are functions that take a node and return, in this very order:
 Defined heuristics should be added to the ALLOWED_LOCAL_HEURISTIC_NAMES dictionnary with their name.
 """
 
+import numpy as np
+import metrics
+
 def choose_first_possible(node):
     for tuple_index, possible_indices_for_subgroups_tuple in enumerate(node.subgroups_possible_indices_tuples):
         for subgroup_index, subgroup_possible_indices in enumerate(possible_indices_for_subgroups_tuple):
@@ -18,7 +21,36 @@ def choose_first_possible(node):
                 chosen_element = next(iter(subgroup_possible_indices))
                 return chosen_element, subgroup_index, tuple_index, 0
 
-ALLOWED_LOCAL_HEURISTIC_NAMES = {'first_possible': choose_first_possible}
+
+
+def find_nearest(dataframe, chosen_indices, subgroup_index, subgroup_possible_indices):
+    mindistance = np.Inf
+    for candidate in subgroup_possible_indices:
+        candidate_tuple = chosen_indices.copy()
+        candidate_tuple[subgroup_index] = candidate
+        dist = metrics.compute_distance_within_tuple(candidate_tuple, dataframe)
+        if dist < mindistance:
+            dist = mindistance
+            best_candidate = candidate
+    return best_candidate
+
+
+def choose_nearest(node):
+    for tuple_index, possible_indices_for_subgroups_tuple in enumerate(node.subgroups_possible_indices_tuples):
+        for subgroup_index, subgroup_possible_indices in enumerate(possible_indices_for_subgroups_tuple):
+            if len(subgroup_possible_indices) > 0 :
+                chosen_indices = node.subgroups_chosen_indices_tuples[tuple_index]
+                chosen_element = find_nearest(node.groups_dataframe,
+                                              chosen_indices,
+                                              subgroup_index,
+                                              subgroup_possible_indices)
+                return chosen_element, subgroup_index, tuple_index, 0
+
+
+ALLOWED_LOCAL_HEURISTIC_NAMES = {
+    'first_possible': choose_first_possible,
+    'simple_nearest': choose_nearest
+}
 
 def get_local_heuristic_by_name(heuristic_name):
     """
