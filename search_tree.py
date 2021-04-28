@@ -142,6 +142,7 @@ class PossibleSubgroupsNode():
         copy_node = PossibleSubgroupsNode(None,1, id = copy_id)
         copy_node.subgroups_possible_indices_tuples = copy.deepcopy(self.subgroups_possible_indices_tuples)
         copy_node.subgroups_chosen_indices_tuples = copy.deepcopy(self.subgroups_chosen_indices_tuples)
+        copy_node.groups_dataframe = self.groups_dataframe
         return copy_node
 
     def __repr__(self):
