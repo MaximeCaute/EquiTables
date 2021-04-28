@@ -95,7 +95,7 @@ def compute_distance_within_tuple(  element_indices_per_subgroup__tuple,
     distance = 0
 
     for baseline_group_index, target_group_index in itertools.combinations(subgroups_indices, 2):
-        tuple =  remove_wrong_indices(element_indices_per_subgroup__tuple)
+        tuple =  remove_wrong_indices_in_tuple(element_indices_per_subgroup__tuple)
         distance = add_modified_distance_from_tuples_and_group_indices(
             distance,
             tuple, tuple,
