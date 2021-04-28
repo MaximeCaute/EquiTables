@@ -105,7 +105,20 @@ class SearchTree():
                 break
 
         self.backtrack_to_root()
-        return self.get_current_solution()
+
+        return self.get_current_subgroup_dataframe()
+
+    def get_current_subgroup_dataframe(self):
+        solution = self.get_current_solution()
+        selected_indices = set(np.asarray(solution).flatten())
+        dropped_indices = set([7])
+
+        solution_dataframe = self.base_dataframe.apply(
+            lambda x: x.drop(dropped_indices.intersection(x.index))
+        )
+        grouping = list(solution_dataframe.index.get_level_values(0))
+        solution_dataframe.index = solution_dataframe.index.droplevel(0)
+        return solution_dataframe.groupby(grouping)
 
 
 class PossibleSubgroupsNode():
