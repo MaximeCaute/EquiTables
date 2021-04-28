@@ -9,10 +9,6 @@ import itertools
 
 EUCLIDIAN_DISTANCE = lambda a,b : np.linalg.norm(a-b)
 
-
-def get_values_vector_from_dataframe_and_row_index(dataframe, row_index):
-    return dataframe.iloc[row_index].values
-
 def compute_distance_from_tuples_and_group_indices(
                 baseline_tuple,
                 target_tuple,
