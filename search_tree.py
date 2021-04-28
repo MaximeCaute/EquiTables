@@ -59,7 +59,7 @@ class SearchTree():
         return self.current_node.solution
 
     def step_forward(self, local_heuristic):
-        chosen_element_index, subgroup_index, tuple_index = local_heuristic(
+        chosen_element_index, subgroup_index, tuple_index, _ = local_heuristic(
                 self.current_node
         )
         #TODO check validity

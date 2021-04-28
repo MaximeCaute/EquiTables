@@ -6,7 +6,8 @@ This file is dedicated to the implementation and selection of local heuristics.
 Heuristics are functions that take a node and return, in this very order:
     - the chosen element;
     - the index of the subgroup it will be part of;
-    - the index of the tuple it will be part of.
+    - the index of the tuple it will be part of;
+    - a score for this choice.
 Defined heuristics should be added to the ALLOWED_LOCAL_HEURISTIC_NAMES dictionnary with their name.
 """
 
@@ -15,7 +16,7 @@ def choose_first_possible(node):
         for subgroup_index, subgroup_possible_indices in enumerate(possible_indices_for_subgroups_tuple):
             if len(subgroup_possible_indices) > 0 :
                 chosen_element = next(iter(subgroup_possible_indices))
-                return chosen_element, subgroup_index, tuple_index
+                return chosen_element, subgroup_index, tuple_index, 0
 
 ALLOWED_LOCAL_HEURISTIC_NAMES = {'first_possible': choose_first_possible}
 
