@@ -13,6 +13,7 @@ import argparse
 import pandas as pd
 
 import local_heuristics
+import global_heuristics
 from search_tree import SearchTree
 
 
@@ -27,6 +28,7 @@ def split_by_labels(df, factors):
 def find_matched_subgroups(groups,
                            columns_to_match,
                            local_heuristic,
+                           global_heuristic,
                            subgroup_size=2):
     """
     Extract subgroups' from a list of data.frames (groups), matched on `columns_to_match`
@@ -44,7 +46,8 @@ def find_matched_subgroups(groups,
     #### TBD  # needs modificatoins in searchtree
 
     search_tree = SearchTree(groups, subgroup_size)
-    subgroups = search_tree.search_and_get_solution(local_heuristic = local_heuristic)
+    subgroups = search_tree.search_and_get_solution(    local_heuristic,
+                                                        global_heuristic)
     # subgroups = groups  # no selection"
     return subgroups
 
@@ -92,16 +95,29 @@ if __name__ == "__main__":
                           help="The size of the data subset to return. ",
                           required=True)
 
-    allowed_heuristic_names = list(
+    allowed_local_heuristic_names = list(
         local_heuristics.ALLOWED_LOCAL_HEURISTIC_NAMES.keys())
+    allowed_global_heuristic_names = list(
+        global_heuristics.ALLOWED_GLOBAL_HEURISTIC_NAMES.keys()
+    )
     optional.add_argument(
         "-h",
         "--local_heuristic_name",
         type=str,
-        default=allowed_heuristic_names[0],
+        default=allowed_local_heuristic_names[0],
         help="The name of the local heuristic to use. " +
-        f"Allowed options are {str(allowed_heuristic_names)}. " +
-        f"Defaults to '{str(allowed_heuristic_names[0])}'. ")
+        f"Allowed options are {str(allowed_local_heuristic_names)}. " +
+        f"Defaults to '{str(allowed_local_heuristic_names[0])}'. ")
+
+    optional.add_argument(
+        "-b",
+        "--global_heuristic_name",
+        type=str,
+        default=allowed_global_heuristic_names[0],
+        help="The name of the global (branch) heuristic to use. " +
+        f"Allowed options are {str(allowed_global_heuristic_names)}. " +
+        f"Defaults to '{str(allowed_global_heuristic_names[0])}'. ")
+
 
     optional.add_argument("-d",
                           "--delimiter",
@@ -126,11 +142,15 @@ if __name__ == "__main__":
     local_heuristic = local_heuristics.get_local_heuristic_by_name(
         args.local_heuristic_name)
 
+    global_heuristic = global_heuristics.get_global_heuristic_by_name(
+        args.global_heuristic_name, local_heuristic)
+
     groups = split_by_labels(df, grouping_factors)
 
     subgroups = find_matched_subgroups(groups,
                                        variables_to_match,
                                        local_heuristic,
+                                       global_heuristic,
                                        subsets_size)
 
     for i, subgroup in enumerate(subgroups):
