@@ -138,6 +138,14 @@ class PossibleSubgroupsNode():
         self.solution = None
         self.indices_decision = (-1,-1,-1)
 
+    def enumerate_possibilities(self):
+        possible_tuples_list = []
+        for tuple, subgroups_possible_indices in enumerate(self.subgroups_possible_indices_tuples):
+            for subgroup, possible_indices in enumerate(subgroups_possible_indices):
+                for possible_index in possible_indices:
+                    possible_tuples_list.append((tuple,subgroup,possible_index))
+        return possible_tuples_list
+
     def copy(self, copy_id=""):
         copy_node = PossibleSubgroupsNode(None,1, id = copy_id)
         copy_node.subgroups_possible_indices_tuples = copy.deepcopy(self.subgroups_possible_indices_tuples)
