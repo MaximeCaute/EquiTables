@@ -141,12 +141,20 @@ class PossibleSubgroupsNode():
         self.indices_decision = (-1,-1,-1)
 
     def enumerate_possibilities(self):
+        # TODO try to recode with enumerate_choices_left?
         possible_tuples_list = []
         for tuple, subgroups_possible_indices in enumerate(self.subgroups_possible_indices_tuples):
             for subgroup, possible_indices in subgroups_possible_indices.items():
                 for possible_index in possible_indices:
                     possible_tuples_list.append((tuple,subgroup,possible_index))
         return possible_tuples_list
+
+    def enumerate_choices_left(self):
+        choices_left = []
+        for tuple, subgroups_possible_indices in enumerate(self.subgroups_possible_indices_tuples):
+            for subgroup, possible_indices in subgroups_possible_indices.items():
+                choices_left.append((tuple,subgroup, possible_indices))
+        return choices_left
 
     def copy(self, copy_id=""):
         copy_node = PossibleSubgroupsNode(None,1, id = copy_id)
