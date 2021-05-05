@@ -5,8 +5,9 @@ Created: 05.05.2021
 This file is dedicated to data preprocessing, for use in EquiTables.
 """
 import numpy as np
-global EQUITABLE_GROUP_INDEX
-EQUITABLE_GROUP_INDEX = 0
+global EQUITABLES_GROUP_INDEX
+EQUITABLES_GROUP_INDEX = 0
+EQUITABLES_BASE_GROUPNAME = "EquiTablesGroup"
 
 def normalize_dataframe(dataframe, variables_to_normalize):
     normalization_factors = {}
@@ -22,6 +23,7 @@ def denormalize_dataframe(dataframe, normalization_factors):
     return dataframe
 
 def split_from_indicator(dataframe, group_indicator_function = lambda row: None):
+    old_dataframe = dataframe
     dataframe = dataframe.copy()
     function_indices_to_equitable_indices = {}
     for index, row in dataframe.iterrows():
@@ -30,16 +32,24 @@ def split_from_indicator(dataframe, group_indicator_function = lambda row: None)
         if group_label == None:
             continue
         if type(group_label) != str:
-            global EQUITABLE_GROUP_INDEX
+            global EQUITABLES_GROUP_INDEX
             print(f"WARNING! Non custom group label used: {group_label}!")
             if group_label not in function_indices_to_equitable_indices:
-                function_indices_to_equitable_indices[group_label] = EQUITABLE_GROUP_INDEX
-                EQUITABLE_GROUP_INDEX+=1
-            group_label = f"EquiTableGroup{function_indices_to_equitable_indices[group_label]}"
-            print(f"Using custom EquiTable label instead: {group_label}")
+                function_indices_to_equitable_indices[group_label] = str(EQUITABLES_GROUP_INDEX)
+                EQUITABLES_GROUP_INDEX+=1
+            group_label = EQUITABLES_BASE_GROUPNAME+function_indices_to_equitable_indices[group_label]
+            print(f"Using custom EquiTables label instead: {group_label}")
 
+        if group_label in old_dataframe:
+            raise Exception(f"Group label already used in original dataframe: {group_label}.")
         if group_label not in dataframe:
             dataframe[group_label] = False
 
         dataframe.at[index, group_label] = True
+    return dataframe
+
+def drop_custom_groups(dataframe, custom_groups_names = []):
+    for column_name in dataframe.copy():
+        if (column_name in custom_groups_names) or column_name.startswith(EQUITABLES_BASE_GROUPNAME):
+            dataframe = dataframe.drop(column_name,axis = 1)
     return dataframe
