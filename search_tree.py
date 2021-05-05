@@ -11,17 +11,17 @@ import copy
 
 ROOT_ID = "root"
 
-def convert_groups_dataframe_to_indices_sets_for_groups(groups_dataframe):
+def convert_groups_dataframe_to_indices_sets_by_group(groups_dataframe):
     if groups_dataframe is None:
-        return [set([1])]
-    dataframe_for_groups= [
-        groups_dataframe.get_group(group_id) for group_id
+        return {}
+    dataframe_and_id_per_group= [
+        (group_id,groups_dataframe.get_group(group_id)) for group_id
                                              in groups_dataframe.indices.keys()
     ]
-    indices_sets_for_groups = [
-        set(dataframe.index) for dataframe in dataframe_for_groups
-    ]
-    return indices_sets_for_groups
+    indices_sets_by_group = {
+        group_id:set(dataframe.index) for group_id,dataframe in dataframe_and_id_per_group
+    }
+    return indices_sets_by_group
 
 
 class SearchTree():
@@ -111,7 +111,8 @@ class SearchTree():
     def get_current_subgroup_dataframe(self):
         solution = self.get_current_solution()
         original_indices = set(self.base_dataframe.apply(lambda x: x).index)
-        selected_indices = set(np.asarray(solution).flatten())
+        selected_indices = set(np.asarray(
+            [list(tuple.values()) for tuple in solution]).flatten())
         dropped_indices = original_indices - selected_indices
 
         solution_dataframe = self.base_dataframe.apply(
@@ -124,12 +125,13 @@ class SearchTree():
 
 class PossibleSubgroupsNode():
     def __init__(self, groups_dataframe, subgroups_size, id =""):
-        indices_sets_for_groups = convert_groups_dataframe_to_indices_sets_for_groups(groups_dataframe)
+        indices_sets_by_group = convert_groups_dataframe_to_indices_sets_by_group(groups_dataframe)
         self.subgroups_possible_indices_tuples = [
-                copy.deepcopy(indices_sets_for_groups) for i in range(subgroups_size)
+                copy.deepcopy(indices_sets_by_group) for i in range(subgroups_size)
         ]
         self.subgroups_chosen_indices_tuples = [
-                [-1]*len(indices_sets_for_groups) for i in range(subgroups_size)
+                {group_id:-1 for group_id in indices_sets_by_group}
+                        for i in range(subgroups_size)
         ]
         self.groups_dataframe = groups_dataframe
 
@@ -141,7 +143,7 @@ class PossibleSubgroupsNode():
     def enumerate_possibilities(self):
         possible_tuples_list = []
         for tuple, subgroups_possible_indices in enumerate(self.subgroups_possible_indices_tuples):
-            for subgroup, possible_indices in enumerate(subgroups_possible_indices):
+            for subgroup, possible_indices in subgroups_possible_indices.items():
                 for possible_index in possible_indices:
                     possible_tuples_list.append((tuple,subgroup,possible_index))
         return possible_tuples_list
@@ -163,9 +165,12 @@ class PossibleSubgroupsNode():
     #################################
 
     def is_leaf(self):
-        return np.all(np.asarray(self.subgroups_chosen_indices_tuples) != -1)
+        return np.all(
+            np.asarray([list(tuple.values())
+                for tuple in self.subgroups_chosen_indices_tuples])
+            != -1)
     def is_end_of_branch(self):
-        return np.all(np.asarray(self.subgroups_possible_indices_tuples) == set())
+        return self.enumerate_possibilities() == []#np.all(np.asarray(self.subgroups_possible_indices_tuples) == set())
     def is_root(self):
         return self.id == ROOT_ID
 
@@ -179,9 +184,9 @@ class PossibleSubgroupsNode():
     #subgroup index is not necessary, but hopefully only fastens computation
     #beware of not having on index for two subgroups
     #DO a none case?
-    def discard_possible_index(self, index, subgroup_index):
+    def discard_possible_index(self, index, subgroup_id):
         for subgroups_possible_indices in self.subgroups_possible_indices_tuples:
-            subgroups_possible_indices[subgroup_index].discard(index)
+            subgroups_possible_indices[subgroup_id].discard(index)
 
     #factoriser les deux?
     def remove_decision(self, decision):
@@ -190,16 +195,20 @@ class PossibleSubgroupsNode():
 
     def decide_index_for_subgroup_in_tuple(self,
                 chosen_element_index,
-                subgroup_index, tuple_index,
+                subgroup_id, tuple_index,
                 groups_dataframe,
                 new_node_id =""):
+        subgroup_id_is_index = subgroup_id not in self.subgroups_possible_indices_tuples[tuple_index]
+        if subgroup_id_is_index:
+            subgroup_id = list(self.subgroups_possible_indices_tuples[tuple_index].keys())[subgroup_id]
+
         new_node = self.copy(copy_id=new_node_id)
-        new_node.subgroups_possible_indices_tuples[tuple_index][subgroup_index] = set()
-        new_node.subgroups_chosen_indices_tuples[tuple_index][subgroup_index] = chosen_element_index
-        new_node.indices_decision = (tuple_index, subgroup_index, chosen_element_index)
+        new_node.subgroups_possible_indices_tuples[tuple_index][subgroup_id] = set()
+        new_node.subgroups_chosen_indices_tuples[tuple_index][subgroup_id] = chosen_element_index
+        new_node.indices_decision = (tuple_index, subgroup_id, chosen_element_index)
         new_node.internal_distance = -1
         new_node.solution = None
-        new_node.discard_possible_index(chosen_element_index, subgroup_index)
+        new_node.discard_possible_index(chosen_element_index, subgroup_id)
 
         if new_node.is_leaf():
             new_node.internal_distance = metrics.compute_distance_between_subgroups(

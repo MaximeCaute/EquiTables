@@ -32,18 +32,19 @@ def compute_distance_from_tuples_and_group_indices(
                 groups_dataframe,
                 distance_metric = EUCLIDIAN_DISTANCE
     ):
+    # baseline_group_index = list(groups_dataframe.indices.keys()).index(baseline_group_id)
+    # target_group_index = list(groups_dataframe.indices.keys()).index(target_group_id)
+    # baseline_element_index = baseline_tuple[baseline_group_index]
+    # target_element_index = target_tuple[target_group_index]
+    baseline_element_index = baseline_tuple[baseline_group_id]
+    target_element_index = target_tuple[target_group_id]
 
-    baseline_group_index = list(groups_dataframe.indices.keys()).index(baseline_group_id)
-    target_group_index = list(groups_dataframe.indices.keys()).index(target_group_id)
-    baseline_element_index = baseline_tuple[baseline_group_index]
-    target_element_index = target_tuple[target_group_index]
-
-    baseline_group = groups_dataframe.get_group(baseline_group_id)
-    target_group = groups_dataframe.get_group(target_group_id)
+    baseline_group_dataframe = groups_dataframe.get_group(baseline_group_id)
+    target_group_dataframe = groups_dataframe.get_group(target_group_id)
 
     #Index is part of .values
-    baseline_element_values = baseline_group.loc[baseline_element_index].values[1:]
-    target_element_values = target_group.loc[target_element_index].values[1:]
+    baseline_element_values = baseline_group_dataframe.loc[baseline_element_index].values[1:]
+    target_element_values = target_group_dataframe.loc[target_element_index].values[1:]
 
     elements_distance = distance_metric(baseline_element_values, target_element_values)
     return elements_distance
@@ -72,7 +73,6 @@ def compute_distance_between_subgroups( element_indices_per_subgroup_per_tuple,
     ):
     subgroups_size = len(element_indices_per_subgroup_per_tuple)
     num_groups = len(element_indices_per_subgroup_per_tuple[0])
-
     distance = 0
 
     groups_ids = groups_dataframe.indices.keys()
@@ -88,19 +88,20 @@ def compute_distance_between_subgroups( element_indices_per_subgroup_per_tuple,
     return distance
 
 def compute_distance_within_tuple(  element_indices_per_subgroup__tuple,
-                                    normalized_data_to_match,
+                                    groups_dataframe,
                                     distance_metric = EUCLIDIAN_DISTANCE):
     num_subgroups = len(element_indices_per_subgroup__tuple)
     subgroups_indices = range(num_subgroups)
+    groups_ids = groups_dataframe.indices.keys()
     distance = 0
 
-    for baseline_group_index, target_group_index in itertools.combinations(subgroups_indices, 2):
+    for baseline_group_index, target_group_index in itertools.combinations(groups_ids, 2):
         tuple =  remove_wrong_indices_in_tuple(element_indices_per_subgroup__tuple)
         distance = add_modified_distance_from_tuples_and_group_indices(
             distance,
             tuple, tuple,
             baseline_group_index,target_group_index,
-            normalized_data_to_match,
+            groups_dataframe,
             distance_metric = distance_metric
         )
     return distance

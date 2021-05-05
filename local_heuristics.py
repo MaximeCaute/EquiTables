@@ -15,11 +15,8 @@ import numpy as np
 import metrics
 
 def choose_first_possible(node):
-    for tuple_index, possible_indices_for_subgroups_tuple in enumerate(node.subgroups_possible_indices_tuples):
-        for subgroup_index, subgroup_possible_indices in enumerate(possible_indices_for_subgroups_tuple):
-            if len(subgroup_possible_indices) > 0 :
-                chosen_element = next(iter(subgroup_possible_indices))
-                return chosen_element, subgroup_index, tuple_index, 0
+    for (tuple_index, subgroup_id, element_index) in node.enumerate_possibilities():
+        return element_index, subgroup_id, tuple_index, 0
 
 
 
