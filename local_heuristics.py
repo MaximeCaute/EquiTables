@@ -29,7 +29,7 @@ def find_nearest(dataframe, chosen_indices, subgroup_index, subgroup_possible_in
         if dist < mindistance:
             mindistance = dist
             best_candidate = candidate
-    return best_candidate
+    return best_candidate, mindistance
 
 
 def choose_nearest(node):
@@ -37,11 +37,11 @@ def choose_nearest(node):
         for subgroup_index, subgroup_possible_indices in possible_indices_for_subgroups_tuple.items():
             if len(subgroup_possible_indices) > 0 :
                 chosen_indices = node.subgroups_chosen_indices_tuples[tuple_index]
-                chosen_element = find_nearest(node.groups_dataframe,
+                chosen_element, score = find_nearest(node.groups_dataframe,
                                               chosen_indices,
                                               subgroup_index,
                                               subgroup_possible_indices)
-                return chosen_element, subgroup_index, tuple_index, 0
+                return chosen_element, subgroup_index, tuple_index, score
 
 
 ALLOWED_LOCAL_HEURISTIC_NAMES = {
