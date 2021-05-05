@@ -140,14 +140,14 @@ class PossibleSubgroupsNode():
         self.solution = None
         self.indices_decision = (-1,-1,-1)
 
-    def enumerate_possibilities(self):
+    def enumerate_possible_decisions(self):
         # TODO try to recode with enumerate_choices_left?
-        possible_tuples_list = []
+        possible_decisions_list = []
         for tuple, subgroups_possible_indices in enumerate(self.subgroups_possible_indices_tuples):
             for subgroup, possible_indices in subgroups_possible_indices.items():
                 for possible_index in possible_indices:
-                    possible_tuples_list.append((tuple,subgroup,possible_index))
-        return possible_tuples_list
+                    possible_decisions_list.append((tuple,subgroup,possible_index))
+        return possible_decisions_list
 
     def enumerate_choices_left(self):
         choices_left = []
@@ -178,7 +178,7 @@ class PossibleSubgroupsNode():
                 for tuple in self.subgroups_chosen_indices_tuples])
             != -1)
     def is_end_of_branch(self):
-        return self.enumerate_possibilities() == []#np.all(np.asarray(self.subgroups_possible_indices_tuples) == set())
+        return self.enumerate_possible_decisions() == []#np.all(np.asarray(self.subgroups_possible_indices_tuples) == set())
     def is_root(self):
         return self.id == ROOT_ID
 
