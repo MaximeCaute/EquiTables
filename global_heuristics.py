@@ -15,9 +15,14 @@ def positive_local_score(local_heuristic, node):
     _, _, _, score = local_heuristic(node)
     return score >= 0
 
+def threshold_score(local_heuristic, node):
+    _, _, _, score = local_heuristic(node)
+    return score >= 0.5
+
 ALLOWED_GLOBAL_HEURISTIC_NAMES = {
     'full_tree': lambda h: search_full_tree,
-    'positive_score': lambda h : lambda node : positive_local_score(h,node)
+    'positive_score': lambda h : lambda node : positive_local_score(h,node),
+    'absolute_threshold': lambda h : lambda node : positive_local_score(h,node)
 }
 
 def get_global_heuristic_by_name(heuristic_name, local_heuristic = None):
