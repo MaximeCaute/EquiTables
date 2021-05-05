@@ -27,14 +27,14 @@ def find_nearest(dataframe, chosen_indices, subgroup_index, subgroup_possible_in
         candidate_tuple[subgroup_index] = candidate
         dist = metrics.compute_distance_within_tuple(candidate_tuple, dataframe)
         if dist < mindistance:
-            dist = mindistance
+            mindistance = dist
             best_candidate = candidate
     return best_candidate
 
 
 def choose_nearest(node):
     for tuple_index, possible_indices_for_subgroups_tuple in enumerate(node.subgroups_possible_indices_tuples):
-        for subgroup_index, subgroup_possible_indices in enumerate(possible_indices_for_subgroups_tuple):
+        for subgroup_index, subgroup_possible_indices in possible_indices_for_subgroups_tuple.items():
             if len(subgroup_possible_indices) > 0 :
                 chosen_indices = node.subgroups_chosen_indices_tuples[tuple_index]
                 chosen_element = find_nearest(node.groups_dataframe,
