@@ -11,11 +11,7 @@ import itertools
 EUCLIDIAN_DISTANCE = lambda a,b : np.linalg.norm(a-b)
 
 def remove_wrong_indices_in_tuple(tuple):
-    valid_indices = []
-    for i, element in enumerate(tuple):
-        if element != -1:
-            valid_indices.append(i)
-    return [tuple[i] for i in valid_indices]
+    return {group_id: index for group_id, index in tuple.items() if index!=-1}
 
 def remove_wrong_indices_in_tuple_pair(tuple1, tuple2):
     valid_indices = []
@@ -90,13 +86,11 @@ def compute_distance_between_subgroups( element_indices_per_subgroup_per_tuple,
 def compute_distance_within_tuple(  element_indices_per_subgroup__tuple,
                                     groups_dataframe,
                                     distance_metric = EUCLIDIAN_DISTANCE):
-    num_subgroups = len(element_indices_per_subgroup__tuple)
-    subgroups_indices = range(num_subgroups)
-    groups_ids = groups_dataframe.indices.keys()
+    tuple =  remove_wrong_indices_in_tuple(element_indices_per_subgroup__tuple)
+    group_ids = list(tuple.keys())
     distance = 0
 
-    for baseline_group_index, target_group_index in itertools.combinations(groups_ids, 2):
-        tuple =  remove_wrong_indices_in_tuple(element_indices_per_subgroup__tuple)
+    for baseline_group_index, target_group_index in itertools.combinations(group_ids, 2):
         distance = add_modified_distance_from_tuples_and_group_indices(
             distance,
             tuple, tuple,
