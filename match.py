@@ -137,6 +137,10 @@ if __name__ == "__main__":
     df = pd.read_csv(args.DATAFILE, sep=args.delimiter)
     variables_to_match = args.match.split(";")
     grouping_factors = args.group.split(";")
+
+    relevant_variables = variables_to_match+grouping_factors
+    df = df[relevant_variables]
+
     subsets_size = args.subset_size
 
     local_heuristic = local_heuristics.get_local_heuristic_by_name(
