@@ -14,6 +14,7 @@ import pandas as pd
 
 import local_heuristics
 import global_heuristics
+import preprocessing
 from search_tree import SearchTree
 
 
@@ -138,8 +139,7 @@ if __name__ == "__main__":
     variables_to_match = args.match.split(";")
     grouping_factors = args.group.split(";")
 
-    relevant_variables = variables_to_match+grouping_factors
-    df = df[relevant_variables]
+    df = preprocessing.drop_irrelevant_columns(df,  variables_to_match+grouping_factors)
 
     subsets_size = args.subset_size
 
