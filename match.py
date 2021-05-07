@@ -14,6 +14,7 @@ import pandas as pd
 
 import local_heuristics
 import global_heuristics
+import preprocessing
 from search_tree import SearchTree
 
 
@@ -137,6 +138,9 @@ if __name__ == "__main__":
     df = pd.read_csv(args.DATAFILE, sep=args.delimiter)
     variables_to_match = args.match.split(";")
     grouping_factors = args.group.split(";")
+
+    df = preprocessing.drop_irrelevant_columns(df,  variables_to_match+grouping_factors)
+
     subsets_size = args.subset_size
 
     local_heuristic = local_heuristics.get_local_heuristic_by_name(

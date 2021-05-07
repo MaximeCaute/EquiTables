@@ -9,6 +9,9 @@ global EQUITABLES_GROUP_INDEX
 EQUITABLES_GROUP_INDEX = 0
 EQUITABLES_BASE_GROUPNAME = "EquiTablesGroup"
 
+def drop_irrelevant_columns(dataframe, relevant_parameters):
+    return dataframe[relevant_parameters]
+
 def normalize_dataframe(dataframe, variables_to_normalize):
     normalization_factors = {}
     for variable_to_normalize in variables_to_normalize:
