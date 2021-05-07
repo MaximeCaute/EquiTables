@@ -49,4 +49,4 @@ def get_global_heuristic_by_name(heuristic_name, local_heuristic = None):
     default_global_heuristic_name = list(ALLOWED_GLOBAL_HEURISTIC_NAMES.keys())[0]
     print(  f"WARNING: invalid name - {heuristic_name}!\n"+
             f"Resolving to default heuristic '{default_global_heuristic_name}'.")
-    return ALLOWED_GLOBAL_HEURISTIC_NAMES[default_local_heuristic_name]
+    return ALLOWED_GLOBAL_HEURISTIC_NAMES[default_global_heuristic_name]
