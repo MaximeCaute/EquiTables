@@ -85,10 +85,8 @@ class SearchTree():
                                         global_heuristic = lambda x: True):
         is_at_root = self.current_node.is_root()
         is_at_end_of_branch = self.current_node.is_end_of_branch()
-        has_solution = self.get_current_solution() is not None
 
-        if not is_at_end_of_branch and (not has_solution
-                                        or global_heuristic(self.current_node)):
+        if not is_at_end_of_branch and global_heuristic(self.current_node):
             self.step_forward(local_heuristic)
             return True
         if not is_at_root:
