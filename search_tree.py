@@ -11,15 +11,20 @@ import copy
 
 ROOT_ID = "root"
 
-def convert_groups_dataframe_to_indices_sets_by_group(groups_dataframe):
-    if groups_dataframe is None:
+def get_elements_indices_by_group_in_dataframe(grouped_dataframe):
+    """
+    Retrieves the sets of indices for each group
+    in a grouped dataframe
+    """
+    if grouped_dataframe is None:
         return {}
     dataframe_and_id_per_group= [
-        (group_id,groups_dataframe.get_group(group_id)) for group_id
-                                             in groups_dataframe.indices.keys()
+        (group_id,grouped_dataframe.get_group(group_id)) for group_id
+                                             in grouped_dataframe.indices.keys()
     ]
     indices_sets_by_group = {
-        group_id:set(dataframe.index) for group_id,dataframe in dataframe_and_id_per_group
+        group_id:set(dataframe.index)   for group_id,dataframe
+                                        in dataframe_and_id_per_group
     }
     return indices_sets_by_group
 
@@ -162,13 +167,15 @@ class PossibleSubgroupsNode():
     Nodes of the tree.
     """
     def __init__(self, groups_dataframe, subgroups_size, id =""):
-        indices_sets_by_group = convert_groups_dataframe_to_indices_sets_by_group(groups_dataframe)
+        indices_sets_by_group = get_elements_indices_by_group_in_dataframe(
+            groups_dataframe
+        )
         self.subgroups_possible_indices_tuples = [
-                copy.deepcopy(indices_sets_by_group) for i in range(subgroups_size)
+            copy.deepcopy(indices_sets_by_group) for i in range(subgroups_size)
         ]
         self.subgroups_chosen_indices_tuples = [
-                {group_id:-1 for group_id in indices_sets_by_group}
-                        for i in range(subgroups_size)
+            {group_id:-1 for group_id in indices_sets_by_group}
+                    for i in range(subgroups_size)
         ]
         self.groups_dataframe = groups_dataframe
 
@@ -185,10 +192,6 @@ class PossibleSubgroupsNode():
         """
         # TODO try to recode with enumerate_choices_left?
         possible_decisions_list = []
-        # for tuple, subgroups_possible_indices in enumerate(self.subgroups_possible_indices_tuples):
-        #     for subgroup, possible_indices in subgroups_possible_indices.items():
-        #         for possible_index in possible_indices:
-        #             possible_decisions_list.append((tuple,subgroup,possible_index))
         for tuple, subgroup, possible_element_indices in self.list_choices_to_make():
             for element_index in possible_element_indices:
                 possible_decisions_list.append((tuple, subgroup, element_index))
@@ -279,7 +282,8 @@ class PossibleSubgroupsNode():
                 groups_dataframe,
                 new_node_id =""):
         """
-        Decides a given index in a given tuple and group in the node.
+        Creates and return a new node based on the decision of
+        a given index in a given tuple and group in this node.
         """
         subgroup_id_is_index = subgroup_id not in self.subgroups_possible_indices_tuples[tuple_index]
         if subgroup_id_is_index:
@@ -302,9 +306,3 @@ class PossibleSubgroupsNode():
             )
             new_node.solution = new_node.subgroups_chosen_indices_tuples
         return new_node
-
-    def compute_index_in_subgroup_in_tuple_with_local_heuristic(
-            self, heuristic, subgroup_index, tuple_index
-    ):
-        possible_indices = self.subgroups_possible_indices_tuples[tuple_index][subgroup_index]
-        return heuristic(possible_indices)
