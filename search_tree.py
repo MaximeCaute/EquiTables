@@ -33,6 +33,8 @@ class SearchTree():
     """
     Search trees for subgroups computation.
     """
+    ########### Constructors and representation
+
     def __init__(self, groups_dataframe, subgroups_size):
         self.num_nodes = 1
         self.root = PossibleSubgroupsNode(groups_dataframe, subgroups_size, id = ROOT_ID)
@@ -53,7 +55,8 @@ class SearchTree():
         self.mothers_by_nodes[new_node] = source_node
         self.num_nodes+=1
 
-    #Name it decide index from current_node
+    ########## Search functions
+
     def make_decision_from_current_node(self, decision):
         """
         Creates a new node based on the decision of an element
@@ -66,12 +69,6 @@ class SearchTree():
         )
         self.add_node(new_node, self.current_node)
         self.current_node = new_node
-
-    def get_current_solution(self):
-        """
-        Return the solution computed at the current node.
-        """
-        return self.current_node.solution
 
     def step_forward(self, local_heuristic):
         """
@@ -123,22 +120,13 @@ class SearchTree():
             return True
         return False
 
-    def search_and_get_solution(self,       local_heuristic = lambda x: (0,0,0),
-                                            global_heuristic = lambda x: True,
-                                            max_iterations = 10000):
-        """
-        Computes a tree search and return the computed solution.
-        """
-        stop_search = False
-        for num_iterations in range(max_iterations):
-            #print(num_iterations, self.current_node)
-            searched_step = self.search_step_and_confirm(local_heuristic, global_heuristic)
-            if not searched_step:
-                break
+    ######### Solution retrieval functions
 
-        self.backtrack_to_root()
-
-        return self.get_current_subgroup_dataframe()
+    def get_current_solution(self):
+        """
+        Return the solution computed at the current node.
+        """
+        return self.current_node.solution
 
     def get_current_subgroup_dataframe(self):
         """
@@ -156,6 +144,23 @@ class SearchTree():
         grouping = list(solution_dataframe.index.get_level_values(0))
         solution_dataframe.index = solution_dataframe.index.droplevel(0)
         return solution_dataframe.groupby(grouping)
+
+    def search_and_get_solution(self,       local_heuristic = lambda x: (0,0,0),
+                                            global_heuristic = lambda x: True,
+                                            max_iterations = 10000):
+        """
+        Computes a tree search and return the computed solution.
+        """
+        stop_search = False
+        for num_iterations in range(max_iterations):
+            #print(num_iterations, self.current_node)
+            searched_step = self.search_step_and_confirm(local_heuristic, global_heuristic)
+            if not searched_step:
+                break
+
+        self.backtrack_to_root()
+
+        return self.get_current_subgroup_dataframe()
 
 
 class PossibleSubgroupsNode():
