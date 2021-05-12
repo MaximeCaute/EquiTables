@@ -161,12 +161,12 @@ if __name__ == "__main__":
 
 
     df = preprocessing.drop_non_relevant_columns(df,  variables_to_match+grouping_factors)
-    groups = split_by_labels(df, grouping_factors)
-    subgroups = find_matched_subgroups(groups,
-                                       variables_to_match,
-                                       local_heuristic,
-                                       global_heuristic,
-                                       subsets_size)
+    grouped_dataframe = split_by_labels(df, grouping_factors)
+    subgrouped_dataframe = find_matched_subgroups(grouped_dataframe,
+                                                    variables_to_match,
+                                                    local_heuristic,
+                                                    global_heuristic,
+                                                    subsets_size)
 
-    for i, subgroup in enumerate(subgroups):
-        pd.DataFrame(subgroup).to_csv(op.join(args.save_path, f'subgroup_{i + 1:02d}.csv'))
+    for i, subgroup_dataframe in enumerate(subgrouped_dataframe):
+        pd.DataFrame(subgroup_dataframe).to_csv(op.join(args.save_path, f'subgroup_{i + 1:02d}.csv'))

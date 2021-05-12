@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Author(s): Maxime Cauté
 Created: 17.03.2021
@@ -214,9 +216,9 @@ class PossibleSubgroupsNode():
         Intended for use in for loops
         """
         possible_decisions_list = []
-        for tuple, subgroup, possible_element_indices in self.list_choices_to_make():
+        for tuple_index, group_id, possible_element_indices in self.list_choices_to_make():
             for element_index in possible_element_indices:
-                possible_decisions_list.append((tuple, subgroup, element_index))
+                possible_decisions_list.append((tuple_index, group_id, element_index))
         return possible_decisions_list
 
     def list_choices_to_make(self):
@@ -226,9 +228,9 @@ class PossibleSubgroupsNode():
         Intended for use in for loops.
         """
         choices_left = []
-        for tuple, possible_subgroup_indices in enumerate(self.subgroups_possible_indices_tuples):
-            for subgroup, possible_element_indices in possible_subgroup_indices.items():
-                choices_left.append((tuple,subgroup, possible_element_indices))
+        for tuple_index, possible_subgroup_indices in enumerate(self.subgroups_possible_indices_tuples):
+            for group_id, possible_element_indices in possible_subgroup_indices.items():
+                choices_left.append((tuple_index,group_id, possible_element_indices))
         return choices_left
 
     ############# Properties
@@ -267,12 +269,12 @@ class PossibleSubgroupsNode():
 
     ############# Decision functions
 
-    def discard_possible_index(self, element_index, subgroup_id):
+    def discard_possible_index(self, element_index, group_id):
         """
         Removes the choice of an index in all the tuples of this node.
         """
         for tuple_index, _ in enumerate(self.subgroups_possible_indices_tuples):
-            self.discard_decision((tuple_index, subgroup_id, element_index))
+            self.discard_decision((tuple_index, group_id, element_index))
 
     #factoriser les deux?
     def discard_decision(self, decision):
