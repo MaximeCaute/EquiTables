@@ -190,7 +190,6 @@ class PossibleSubgroupsNode():
         as triples of tuple, subgroup, and element index.
         Intended for use in for loops
         """
-        # TODO try to recode with enumerate_choices_left?
         possible_decisions_list = []
         for tuple, subgroup, possible_element_indices in self.list_choices_to_make():
             for element_index in possible_element_indices:
