@@ -54,17 +54,13 @@ class SearchTree():
         self.num_nodes+=1
 
     #Name it decide index from current_node
-    def decide_index_for_subgroup_in_tuple_from_current_node(self,
-                                                            index,
-                                                            subgroup_index,
-                                                            tuple_index
-                                                            ):
+    def make_decision_from_current_node(self, decision):
         """
         Creates a new node based on the decision of an element
         from the current node, and moves to this new node.
         """
-        new_node = self.current_node.decide_index_for_subgroup_in_tuple(
-                index, subgroup_index, tuple_index, self.base_dataframe,
+        new_node = self.current_node.create_new_node_from_decision(
+                decision, self.base_dataframe,
                 new_node_id = self.num_nodes
         )
         self.add_node(new_node, self.current_node)
@@ -80,12 +76,11 @@ class SearchTree():
         """
         Moves down to a new node according to a local heuristic
         """
-        chosen_element_index, subgroup_index, tuple_index, _ = local_heuristic(
+        chosen_element_index, group_id, tuple_index, _ = local_heuristic(
                 self.current_node
         )
-        #TODO check validity
-        self.decide_index_for_subgroup_in_tuple_from_current_node(
-            chosen_element_index, subgroup_index, tuple_index
+        self.make_decision_from_current_node(
+            (tuple_index, group_id, chosen_element_index)
         )
 
     def backtrack(self):
@@ -277,29 +272,30 @@ class PossibleSubgroupsNode():
             element_index
             )
 
-    def decide_index_for_subgroup_in_tuple(self,
-                chosen_element_index,
-                group_id, tuple_index,
-                groups_dataframe,
-                new_node_id =""):
+    def create_new_node_from_decision(
+            self,
+            decision,
+            groups_dataframe,
+            new_node_id =""
+        ):
         """
-        Creates and return a new node based on the decision of
-        a given index in a given tuple and group in this node.
+        Creates and return a new node based on a decision
+        (a tuple index, a group id and an element_index) in this node.
         """
-        group_id = self.validate_group_id(group_id)
+        tuple_index, group_id, element_index = self.validate_decision(decision)
 
         new_node = self.copy(copy_id=new_node_id)
         new_node.subgroups_possible_indices_tuples[tuple_index][group_id] = set()
-        new_node.subgroups_chosen_indices_tuples[tuple_index][group_id] = chosen_element_index
-        new_node.indices_decision = (tuple_index, group_id, chosen_element_index)
+        new_node.subgroups_chosen_indices_tuples[tuple_index][group_id] = element_index
+        new_node.indices_decision = (tuple_index, group_id, element_index)
         new_node.internal_distance = -1
         new_node.solution = None
-        new_node.discard_possible_index(chosen_element_index, group_id)
+        new_node.discard_possible_index(element_index, group_id)
 
         if new_node.is_leaf():
             new_node.internal_distance = metrics.compute_distance_between_subgroups(
                 new_node.subgroups_chosen_indices_tuples,
-                groups_dataframe#base_dataframe
+                groups_dataframe
             )
             new_node.solution = new_node.subgroups_chosen_indices_tuples
         return new_node
@@ -318,9 +314,12 @@ class PossibleSubgroupsNode():
             group_ids = list(
                 self.subgroups_possible_indices_tuples[0].keys()
             )
+
             group_indices = range(len(group_ids))
             if group_index not in group_indices:
                 raise ValueError(f"Tried to interpret {group_index} as a group index, but valid indices are {groups_indices}!")
+
+            return group_ids[group_index]
 
         if not isinstance(group_id, str):
             raise TypeError(f"Groups id should be of type int or str, not {type(group_id)}!")
@@ -336,6 +335,6 @@ class PossibleSubgroupsNode():
         """
         if len(decision) != 3:
             raise TypeError("Decision should only have three elements!")
-        _, group_id, _ = decision
-        self.validate_group_id(group_id)
-        return decision
+        tuple_index, group_id, element_index = decision
+        group_id = self.validate_group_id(group_id)
+        return tuple_index, group_id, element_index
