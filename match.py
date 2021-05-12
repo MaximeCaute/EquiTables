@@ -1,4 +1,5 @@
-#! /usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Author(s): Maxime Cauté
 Created: 03.03.2021
@@ -19,43 +20,54 @@ from search_tree import SearchTree
 
 
 def split_by_labels(df, factors):
-    """ split dataframe df according to
-    the subgroups obtained by crossing the columns listed in factors
-    and drop factors"""
+    """
+    Splits a dataframe according to the subgroups obtained
+    by crossing the columns listed in factors.
+    Each subgroup thus matches a given n-uple of values along these factors.
+    It then proceeds to drop the factors.
+    --
+    Input:
+        - df: pd.DataFrame. The dataframe to split.
+        - factors: string list.
+            The name of the columns to split the dataframe over.
+    Output:
+        - grouped_df: pd.DataFrameGroupBy.
+            The dataframe grouped by factored groups.
+    """
     x = df[factors].astype(str).agg('-'.join, axis=1)  # merge columns
     return df.drop(factors, axis=1).groupby(x)
 
 
-def find_matched_subgroups(groups,
+def find_matched_subgroups(grouped_dataframe,
                            columns_to_match,
                            local_heuristic,
                            global_heuristic,
                            subgroup_size=2):
     """
-    Extract subgroups' from a list of data.frames (groups), matched on `columns_to_match`
-
+    Computes matched subgroups from a grouped dataframe.
+    --
     Input:
-        - groups :  list of pandas DataFrame
-
+        - grouped_dataframe: pd.DataFrameGroupBy.
+            The grouped dataframe to compute subgroups from.
+        - columns_to_match: string_list. The columns to match the subgroups on.
+        - local_heuristic: local heuristic.
+            The local heuristic to use in the search.
+            See EquiTables.local_heuristics for details
+        - global_heuristic: global heuristic.
+            The global heuristic to use in the search.
+            See EquiTables.global_heuristics for details
     Parameters:
-        - subgroup_size: int     size of the subgroups to extract.
-
+        - subgroup_size: int. The size of the subgroups to compute.
+            Defaults to 2.
     Outputs:
-        a list of dataframes of length subgroup_size
-
+        - subgrouped_dataframe: pd.DataFrameGroupBy.
+            The dataframe made of the subgroups of the original dataframe.
+            Non-grouped elements have been removed.
     """
-    #### TBD  # needs modificatoins in searchtree
-
-    search_tree = SearchTree(groups, subgroup_size)
-    subgroups = search_tree.search_and_get_solution(    local_heuristic,
-                                                        global_heuristic)
-    # subgroups = groups  # no selection"
-    return subgroups
-
-
-def get_arguments():
-    return args
-
+    search_tree = SearchTree(grouped_dataframe, subgroup_size)
+    subgrouped_dataframe = search_tree.search_and_get_solution( local_heuristic,
+                                                                global_heuristic)
+    return subgrouped_dataframe
 
 if __name__ == "__main__":
     """
@@ -139,8 +151,6 @@ if __name__ == "__main__":
     variables_to_match = args.match.split(";")
     grouping_factors = args.group.split(";")
 
-    df = preprocessing.drop_irrelevant_columns(df,  variables_to_match+grouping_factors)
-
     subsets_size = args.subset_size
 
     local_heuristic = local_heuristics.get_local_heuristic_by_name(
@@ -149,8 +159,9 @@ if __name__ == "__main__":
     global_heuristic = global_heuristics.get_global_heuristic_by_name(
         args.global_heuristic_name, local_heuristic)
 
-    groups = split_by_labels(df, grouping_factors)
 
+    df = preprocessing.drop_non_relevant_columns(df,  variables_to_match+grouping_factors)
+    groups = split_by_labels(df, grouping_factors)
     subgroups = find_matched_subgroups(groups,
                                        variables_to_match,
                                        local_heuristic,

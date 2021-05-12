@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Author: Maxime Cauté
 Created: 31/03/2021
@@ -17,8 +19,6 @@ import metrics
 def choose_first_possible(node):
     for (tuple_index, subgroup_id, element_index) in node.enumerate_possible_decisions():
         return element_index, subgroup_id, tuple_index, 0
-
-
 
 def find_nearest(dataframe, chosen_indices, subgroup_index, subgroup_possible_indices):
     mindistance = np.Inf
@@ -57,7 +57,8 @@ def get_local_heuristic_by_name(heuristic_name):
     Input:
         - heuristic_name: string. The name of the heuristic.
             Current possible options are:
-                + first_possible.
+                + first_possible
+                + simple_nearest
     Outputs:
         - local_heuristic: local_heuristic. The chosen local heuristic.
             Is "first_possible" heuristic by default for invalid names.

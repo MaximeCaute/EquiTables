@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Author: Maxime Cauté
 Created: 31/03/2021
@@ -37,12 +39,16 @@ def get_global_heuristic_by_name(heuristic_name, local_heuristic = None):
     Input:
         - heuristic_name: string. The name of the heuristic.
             Current possible options are:
-                + full_tree.
-    Parameters
+                + full_tree
+                + positive_score
+                + absolute_threshold
+    Parameters:
+        - local_heuristic: local heuristic.
+            An eventual local heuristic to build the global one.
+            Defaults to None.
     Outputs:
         - global_heuristic: global_heuristic. The chosen global heuristic.
             Is "full_tree" heuristic by default for invalid names.
-
     """
     if heuristic_name in ALLOWED_GLOBAL_HEURISTIC_NAMES:
         return  ALLOWED_GLOBAL_HEURISTIC_NAMES[heuristic_name](local_heuristic)

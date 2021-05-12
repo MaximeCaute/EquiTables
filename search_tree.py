@@ -25,6 +25,9 @@ def convert_groups_dataframe_to_indices_sets_by_group(groups_dataframe):
 
 
 class SearchTree():
+    """
+    Search trees for subgroups computation.
+    """
     def __init__(self, groups_dataframe, subgroups_size):
         self.num_nodes = 1
         self.root = PossibleSubgroupsNode(groups_dataframe, subgroups_size, id = ROOT_ID)
@@ -39,6 +42,9 @@ class SearchTree():
                 f"Current node: {repr(self.current_node)}")
 
     def add_node(self, new_node,source_node):
+        """
+        Adds a node to the tree
+        """
         self.mothers_by_nodes[new_node] = source_node
         self.num_nodes+=1
 
@@ -48,6 +54,10 @@ class SearchTree():
                                                             subgroup_index,
                                                             tuple_index
                                                             ):
+        """
+        Creates a new node based on the decision of an element
+        from the current node, and moves to this new node.
+        """
         new_node = self.current_node.decide_index_for_subgroup_in_tuple(
                 index, subgroup_index, tuple_index, self.base_dataframe,
                 new_node_id = self.num_nodes
@@ -56,9 +66,15 @@ class SearchTree():
         self.current_node = new_node
 
     def get_current_solution(self):
+        """
+        Return the solution computed at the current node.
+        """
         return self.current_node.solution
 
     def step_forward(self, local_heuristic):
+        """
+        Moves down to a new node according to a local heuristic
+        """
         chosen_element_index, subgroup_index, tuple_index, _ = local_heuristic(
                 self.current_node
         )
@@ -68,6 +84,10 @@ class SearchTree():
         )
 
     def backtrack(self):
+        """
+        Moves back to the mother node of the current one,
+        and brings information up from it.
+        """
         origin_node = self.current_node
         self.current_node = self.mothers_by_nodes[origin_node]
 
@@ -77,12 +97,20 @@ class SearchTree():
         self.current_node.remove_decision(origin_node.indices_decision)
 
     def backtrack_to_root(self):
+        """
+        Backtracks up to the root of the tree.
+        """
         while not self.current_node.is_root():
             #print("backtrack", self.current_node)
             self.backtrack()
 
     def search_step_and_confirm(self,   local_heuristic = lambda x: (0,0,0),
                                         global_heuristic = lambda x: True):
+        """
+        Does a search step according to a global heuristic,
+        to know if it should further the current path.
+        Returns whether the step was successful (going deeper) or not.
+        """
         is_at_root = self.current_node.is_root()
         is_at_end_of_branch = self.current_node.is_end_of_branch()
 
@@ -97,6 +125,9 @@ class SearchTree():
     def search_and_get_solution(self,       local_heuristic = lambda x: (0,0,0),
                                             global_heuristic = lambda x: True,
                                             max_iterations = 10000):
+        """
+        Computes a tree search and return the computed solution.
+        """
         stop_search = False
         for num_iterations in range(max_iterations):
             #print(num_iterations, self.current_node)
@@ -109,6 +140,9 @@ class SearchTree():
         return self.get_current_subgroup_dataframe()
 
     def get_current_subgroup_dataframe(self):
+        """
+        Returns the subgrouped dataframe associated with the current solution.
+        """
         solution = self.get_current_solution()
         original_indices = set(self.base_dataframe.apply(lambda x: x).index)
         selected_indices = set(np.asarray(
@@ -124,6 +158,9 @@ class SearchTree():
 
 
 class PossibleSubgroupsNode():
+    """
+    Nodes of the tree.
+    """
     def __init__(self, groups_dataframe, subgroups_size, id =""):
         indices_sets_by_group = convert_groups_dataframe_to_indices_sets_by_group(groups_dataframe)
         self.subgroups_possible_indices_tuples = [
