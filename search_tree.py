@@ -162,6 +162,9 @@ class PossibleSubgroupsNode():
     """
     Nodes of the tree.
     """
+
+    ########### Constructors and representation
+
     def __init__(self, groups_dataframe, subgroups_size, id =""):
         indices_sets_by_group = get_elements_indices_by_group_in_dataframe(
             groups_dataframe
@@ -179,6 +182,25 @@ class PossibleSubgroupsNode():
         self.internal_distance = -1
         self.solution = None
         self.indices_decision = (-1,-1,-1)
+
+    def copy(self, copy_id=""):
+        """
+        Creates a (deep) copy of a node
+        """
+        copy_node = PossibleSubgroupsNode(None,1, id = copy_id)
+        copy_node.subgroups_possible_indices_tuples = copy.deepcopy(self.subgroups_possible_indices_tuples)
+        copy_node.subgroups_chosen_indices_tuples = copy.deepcopy(self.subgroups_chosen_indices_tuples)
+        copy_node.groups_dataframe = self.groups_dataframe
+        return copy_node
+
+    def __repr__(self):
+        return f"Node {self.id}"
+
+    def __str__(self):
+        return (f"[Node {self.id} <- {self.subgroups_chosen_indices_tuples} <- {self.subgroups_possible_indices_tuples}; "
+                f"Solution: {self.solution}; internal_distance = {self.internal_distance}]")
+
+    ############# Iteration functions
 
     def list_possible_decisions(self):
         """
@@ -204,24 +226,7 @@ class PossibleSubgroupsNode():
                 choices_left.append((tuple,subgroup, possible_element_indices))
         return choices_left
 
-    def copy(self, copy_id=""):
-        """
-        Creates a (deep) copy of a node
-        """
-        copy_node = PossibleSubgroupsNode(None,1, id = copy_id)
-        copy_node.subgroups_possible_indices_tuples = copy.deepcopy(self.subgroups_possible_indices_tuples)
-        copy_node.subgroups_chosen_indices_tuples = copy.deepcopy(self.subgroups_chosen_indices_tuples)
-        copy_node.groups_dataframe = self.groups_dataframe
-        return copy_node
-
-    def __repr__(self):
-        return f"Node {self.id}"
-
-    def __str__(self):
-        return (f"[Node {self.id} <- {self.subgroups_chosen_indices_tuples} <- {self.subgroups_possible_indices_tuples}; "
-                f"Solution: {self.solution}; internal_distance = {self.internal_distance}]")
-
-    #################################
+    ############# Properties
 
     def is_leaf(self):
         """
@@ -254,6 +259,8 @@ class PossibleSubgroupsNode():
         if target_node.internal_distance < 0:
             return True
         return self.internal_distance < target_node.internal_distance
+
+    ############# Decision functions
 
     def discard_possible_index(self, element_index, subgroup_id):
         """
