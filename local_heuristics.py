@@ -17,7 +17,7 @@ import numpy as np
 import metrics
 
 def choose_first_possible(node):
-    for (tuple_index, subgroup_id, element_index) in node.enumerate_possible_decisions():
+    for (tuple_index, subgroup_id, element_index) in node.list_possible_decisions():
         return element_index, subgroup_id, tuple_index, 0
 
 def find_nearest(dataframe, chosen_indices, subgroup_index, subgroup_possible_indices):
@@ -33,7 +33,7 @@ def find_nearest(dataframe, chosen_indices, subgroup_index, subgroup_possible_in
 
 
 def choose_nearest(node):
-    for tuple_index, subgroup_id, possible_indices in node.enumerate_choices_left():
+    for tuple_index, subgroup_id, possible_indices in node.list_choices_to_make():
         if len(possible_indices) > 0 :
             chosen_indices = node.subgroups_chosen_indices_tuples[tuple_index]
             chosen_element, score = find_nearest(node.groups_dataframe,

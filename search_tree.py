@@ -177,20 +177,33 @@ class PossibleSubgroupsNode():
         self.solution = None
         self.indices_decision = (-1,-1,-1)
 
-    def enumerate_possible_decisions(self):
+    def list_possible_decisions(self):
+        """
+        Returns a list of possible decisions,
+        as triples of tuple, subgroup, and element index.
+        Intended for use in for loops
+        """
         # TODO try to recode with enumerate_choices_left?
         possible_decisions_list = []
-        for tuple, subgroups_possible_indices in enumerate(self.subgroups_possible_indices_tuples):
-            for subgroup, possible_indices in subgroups_possible_indices.items():
-                for possible_index in possible_indices:
-                    possible_decisions_list.append((tuple,subgroup,possible_index))
+        # for tuple, subgroups_possible_indices in enumerate(self.subgroups_possible_indices_tuples):
+        #     for subgroup, possible_indices in subgroups_possible_indices.items():
+        #         for possible_index in possible_indices:
+        #             possible_decisions_list.append((tuple,subgroup,possible_index))
+        for tuple, subgroup, possible_element_indices in self.list_choices_to_make():
+            for element_index in possible_element_indices:
+                possible_decisions_list.append((tuple, subgroup, element_index))
         return possible_decisions_list
 
-    def enumerate_choices_left(self):
+    def list_choices_to_make(self):
+        """
+        Returns a list of choices left,
+        as triples of tuple, subgroup, and a set of element indices to choose from.
+        Intended for use in for loops.
+        """
         choices_left = []
-        for tuple, subgroups_possible_indices in enumerate(self.subgroups_possible_indices_tuples):
-            for subgroup, possible_indices in subgroups_possible_indices.items():
-                choices_left.append((tuple,subgroup, possible_indices))
+        for tuple, possible_subgroup_indices in enumerate(self.subgroups_possible_indices_tuples):
+            for subgroup, possible_element_indices in possible_subgroup_indices.items():
+                choices_left.append((tuple,subgroup, possible_element_indices))
         return choices_left
 
     def copy(self, copy_id=""):
@@ -215,7 +228,7 @@ class PossibleSubgroupsNode():
                 for tuple in self.subgroups_chosen_indices_tuples])
             != -1)
     def is_end_of_branch(self):
-        return self.enumerate_possible_decisions() == []#np.all(np.asarray(self.subgroups_possible_indices_tuples) == set())
+        return self.list_possible_decisions() == []#np.all(np.asarray(self.subgroups_possible_indices_tuples) == set())
     def is_root(self):
         return self.id == ROOT_ID
 
