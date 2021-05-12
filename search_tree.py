@@ -60,7 +60,8 @@ class SearchTree():
         from the current node, and moves to this new node.
         """
         new_node = self.current_node.create_new_node_from_decision(
-                decision, self.base_dataframe,
+                decision,
+                self.base_dataframe,
                 new_node_id = self.num_nodes
         )
         self.add_node(new_node, self.current_node)
@@ -265,12 +266,15 @@ class PossibleSubgroupsNode():
     def discard_decision(self, decision):
         """
         Removes a possible decision from this node.
-        (that is, an index choice linked to a given tuple and group)
+        (that is, an index choice linked to a given tuple and group).
         """
-        tuple_index, group_id, element_index = self.validate_decision(decision)
+        tuple_index, group_id, element_index = self.validate_decision(
+            decision,
+            check_element_index = False
+        )
         self.subgroups_possible_indices_tuples[tuple_index][group_id].discard(
             element_index
-            )
+        )
 
     def create_new_node_from_decision(
             self,
@@ -326,9 +330,19 @@ class PossibleSubgroupsNode():
 
         if group_id in self.subgroups_possible_indices_tuples[0]:
             return group_id
+
         raise ValueError(f"Wrong group id:{group_id}!")
 
-    def validate_decision(self, decision):
+    def validate_tuple_index(self, tuple_index: int):
+        """
+        Ensures a tuple index is valid in the given node.
+        """
+        valid_tuple_indices = range(len(self.subgroups_possible_indices_tuples))
+        if tuple_index in valid_tuple_indices:
+            return tuple_index
+        raise ValueError(f"Invalid tuple index: {tuple_index}! Should be in {valid_tuple_indices}")
+
+    def validate_decision(self, decision, check_element_index = True):
         """
         Ensures the decision is valid in the given node.
         Fixes the group id if necessary.
@@ -336,5 +350,11 @@ class PossibleSubgroupsNode():
         if len(decision) != 3:
             raise TypeError("Decision should only have three elements!")
         tuple_index, group_id, element_index = decision
+        tuple_index = self.validate_tuple_index(tuple_index)
         group_id = self.validate_group_id(group_id)
+
+        valid_element_indices = self.subgroups_possible_indices_tuples[tuple_index][group_id]
+        if check_element_index and element_index not in valid_element_indices:
+            raise ValueError(f"Wrong element index! Is {element_index} and should be in {valid_element_indices}!")
+
         return tuple_index, group_id, element_index
