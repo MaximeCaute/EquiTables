@@ -272,31 +272,29 @@ class PossibleSubgroupsNode():
         Removes a possible decision from this node.
         (that is, an index choice linked to a given tuple and group)
         """
-        tuple_index, group_id, element_index = decision
-        self.subgroups_possible_indices_tuples[tuple_index][group_id].discard(element_index)
+        tuple_index, group_id, element_index = self.validate_decision(decision)
+        self.subgroups_possible_indices_tuples[tuple_index][group_id].discard(
+            element_index
+            )
 
     def decide_index_for_subgroup_in_tuple(self,
                 chosen_element_index,
-                subgroup_id, tuple_index,
+                group_id, tuple_index,
                 groups_dataframe,
                 new_node_id =""):
         """
         Creates and return a new node based on the decision of
         a given index in a given tuple and group in this node.
         """
-        subgroup_id_is_index = subgroup_id not in self.subgroups_possible_indices_tuples[tuple_index]
-        if subgroup_id_is_index:
-            subgroup_id = list(
-                self.subgroups_possible_indices_tuples[tuple_index].keys()
-            )[subgroup_id]
+        group_id = self.validate_group_id(group_id)
 
         new_node = self.copy(copy_id=new_node_id)
-        new_node.subgroups_possible_indices_tuples[tuple_index][subgroup_id] = set()
-        new_node.subgroups_chosen_indices_tuples[tuple_index][subgroup_id] = chosen_element_index
-        new_node.indices_decision = (tuple_index, subgroup_id, chosen_element_index)
+        new_node.subgroups_possible_indices_tuples[tuple_index][group_id] = set()
+        new_node.subgroups_chosen_indices_tuples[tuple_index][group_id] = chosen_element_index
+        new_node.indices_decision = (tuple_index, group_id, chosen_element_index)
         new_node.internal_distance = -1
         new_node.solution = None
-        new_node.discard_possible_index(chosen_element_index, subgroup_id)
+        new_node.discard_possible_index(chosen_element_index, group_id)
 
         if new_node.is_leaf():
             new_node.internal_distance = metrics.compute_distance_between_subgroups(
@@ -305,3 +303,39 @@ class PossibleSubgroupsNode():
             )
             new_node.solution = new_node.subgroups_chosen_indices_tuples
         return new_node
+
+    #################################### Type & Values checking ################
+    #Should do with tuple, but as we have self... wait for tuple class
+    def validate_group_id(self,group_id):
+        """
+        Ensures the group id is valid in the given node.
+        If it is already a valid id, it is directly returned.
+        If it is an integer (i.e. an index), it is used as such.
+        All other cases raise an Error.
+        """
+        if isinstance(group_id, int):
+            group_index = group_id
+            group_ids = list(
+                self.subgroups_possible_indices_tuples[0].keys()
+            )
+            group_indices = range(len(group_ids))
+            if group_index not in group_indices:
+                raise ValueError(f"Tried to interpret {group_index} as a group index, but valid indices are {groups_indices}!")
+
+        if not isinstance(group_id, str):
+            raise TypeError(f"Groups id should be of type int or str, not {type(group_id)}!")
+
+        if group_id in self.subgroups_possible_indices_tuples[0]:
+            return group_id
+        raise ValueError(f"Wrong group id:{group_id}!")
+
+    def validate_decision(self, decision):
+        """
+        Ensures the decision is valid in the given node.
+        Fixes the group id if necessary.
+        """
+        if len(decision) != 3:
+            raise TypeError("Decision should only have three elements!")
+        _, group_id, _ = decision
+        self.validate_group_id(group_id)
+        return decision
