@@ -13,3 +13,8 @@ This repository is dedicated to the reimplementation of the programs Match and M
 - deal with categorical group column.
 - add possibility not to drop custom Equitable groups (Equitables.preprocessing)
 - graceful handling of invalid functions use.
+- do not go to the end of nodes with a missing chosen index and no choice left for it (EquiTables.search_tree).
+- parametrize discard_possible_index (EquiTables.search_tree) so that the group index is not necessary
+- rename possible_indices_tuple and chosen_indices_tuple to choice & decision tuples. (EquiTables.search_tree)
+- rename decide_index_for_subgroup_in_tuple as create_new_node_from_decision and change params to a decision for explicitness? (EquiTables.search_tree)
+- create debug version of search trees. (EquiTables.search_tree)
