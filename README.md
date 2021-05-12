@@ -29,17 +29,17 @@ A few improvements are planned, in making the program:
 
 The main file is `match.py` (name bound to change). Running it requires to use the following command line in your terminal, with the relevant arguments:
 
-  python3 match.py -m MATCH -g GROUP -s SUBSET_SIZE [-h LOCAL_HEURISTIC_NAME]
+    python3 match.py -m MATCH -g GROUP -s SUBSET_SIZE [-h LOCAL_HEURISTIC_NAME]
               [-b GLOBAL_HEURISTIC_NAME] [-d DELIMITER] [-p SAVE_PATH]
               DATAFILE
 
 If you want to make a simple test of the program, you may run the following command to try out our toy examples:
 
-  python3 match.py ToySets/toy_data.csv -m Value -g Control -s 2
+    python3 match.py ToySets/toy_data.csv -m Value -g Control -s 2
 
 **!** You may want to put the result in a separate file! You will have to create it and then add its name to the arguments. If you named your folder `results`, you could thus extend the previous command as:
 
-  python3 match.py ToySets/toy_data.csv -m Value -g Control -s 2 -p results/
+    python3 match.py ToySets/toy_data.csv -m Value -g Control -s 2 -p results/
 
 Further examples are mentionned in the main file.
 
