@@ -18,3 +18,4 @@ This repository is dedicated to the reimplementation of the programs Match and M
 - rename possible_indices_tuple and chosen_indices_tuple to choice & decision tuples. (EquiTables.search_tree)
 - rename decide_index_for_subgroup_in_tuple as create_new_node_from_decision and change params to a decision for explicitness? (EquiTables.search_tree)
 - create debug version of search trees. (EquiTables.search_tree)
+- move get_elements_indices_by_group_in_dataframe (EquiTables.search_tree)
