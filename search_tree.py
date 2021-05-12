@@ -94,7 +94,7 @@ class SearchTree():
         if origin_node.has_better_distance_than(self.current_node):
             self.current_node.internal_distance = origin_node.internal_distance
             self.current_node.solution = origin_node.solution
-        self.current_node.remove_decision(origin_node.indices_decision)
+        self.current_node.discard_decision(origin_node.indices_decision)
 
     def backtrack_to_root(self):
         """
@@ -207,6 +207,9 @@ class PossibleSubgroupsNode():
         return choices_left
 
     def copy(self, copy_id=""):
+        """
+        Creates a (deep) copy of a node
+        """
         copy_node = PossibleSubgroupsNode(None,1, id = copy_id)
         copy_node.subgroups_possible_indices_tuples = copy.deepcopy(self.subgroups_possible_indices_tuples)
         copy_node.subgroups_chosen_indices_tuples = copy.deepcopy(self.subgroups_chosen_indices_tuples)
@@ -223,42 +226,66 @@ class PossibleSubgroupsNode():
     #################################
 
     def is_leaf(self):
+        """
+        Returns if this node is a leaf.
+        In other words, it checks if all the indices were chosen in this node.
+        """
         return np.all(
             np.asarray([list(tuple.values())
                 for tuple in self.subgroups_chosen_indices_tuples])
             != -1)
     def is_end_of_branch(self):
-        return self.list_possible_decisions() == []#np.all(np.asarray(self.subgroups_possible_indices_tuples) == set())
+        """
+        Returns if this node is at the end of its branch.
+        In other words, it checks if there is no choice left to be made.
+        """
+        return self.list_possible_decisions() == []
     def is_root(self):
-        return self.id == ROOT_ID
+        """
+        Checks if a node is the root of the tree.
+        """
+        return self.id is ROOT_ID
 
     def has_better_distance_than(self, target_node):
+        """
+        Compares the distance between this node and a target one and
+        returns if the this node's distance is strictly smaller.
+        """
         if self.internal_distance < 0:
             return False
         if target_node.internal_distance < 0:
             return True
         return self.internal_distance < target_node.internal_distance
 
-    #subgroup index is not necessary, but hopefully only fastens computation
-    #beware of not having on index for two subgroups
-    #DO a none case?
-    def discard_possible_index(self, index, subgroup_id):
-        for subgroups_possible_indices in self.subgroups_possible_indices_tuples:
-            subgroups_possible_indices[subgroup_id].discard(index)
+    def discard_possible_index(self, element_index, subgroup_id):
+        """
+        Removes the choice of an index in all the tuples of this node.
+        """
+        for tuple_index, _ in enumerate(self.subgroups_possible_indices_tuples):
+            self.discard_decision((tuple_index, subgroup_id, element_index))
 
     #factoriser les deux?
-    def remove_decision(self, decision):
-        tuple_index, group_index, element_index = decision
-        self.subgroups_possible_indices_tuples[tuple_index][group_index].discard(element_index)
+    def discard_decision(self, decision):
+        """
+        Removes a possible decision from this node.
+        (that is, an index choice linked to a given tuple and group)
+        """
+        tuple_index, group_id, element_index = decision
+        self.subgroups_possible_indices_tuples[tuple_index][group_id].discard(element_index)
 
     def decide_index_for_subgroup_in_tuple(self,
                 chosen_element_index,
                 subgroup_id, tuple_index,
                 groups_dataframe,
                 new_node_id =""):
+        """
+        Decides a given index in a given tuple and group in the node.
+        """
         subgroup_id_is_index = subgroup_id not in self.subgroups_possible_indices_tuples[tuple_index]
         if subgroup_id_is_index:
-            subgroup_id = list(self.subgroups_possible_indices_tuples[tuple_index].keys())[subgroup_id]
+            subgroup_id = list(
+                self.subgroups_possible_indices_tuples[tuple_index].keys()
+            )[subgroup_id]
 
         new_node = self.copy(copy_id=new_node_id)
         new_node.subgroups_possible_indices_tuples[tuple_index][subgroup_id] = set()
